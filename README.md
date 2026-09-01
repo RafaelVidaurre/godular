@@ -11,14 +11,16 @@ If your project has reached the point where autoloads reach into other autoloads
 From the Godot Asset Library:
 
 1. In the Godot editor, open the AssetLib tab and search for "Godular".
-2. Download and install it. Keep both `addons/godular` and `addons/gd_promise` selected; Godular needs both.
+2. Download and install it into your project.
 3. Enable "Godular" under Project settings, then Plugins.
 
 Or manually:
 
 1. Download this repository as a zip (or grab a release).
-2. Copy `addons/godular` and `addons/gd_promise` into your project's `addons` folder.
+2. Copy the `addons` folder into your project.
 3. Enable "Godular" under Project settings, then Plugins.
+
+Every download already contains everything Godular needs. Its one dependency, the [GdPromise](addons/gd_promise) promise library, is developed in this repository and ships in `addons/gd_promise` alongside the plugin, so there is nothing to install separately.
 
 Enabling the plugin adds a `GdlrModuleManager` autoload, which is how you mount and start your modules.
 
