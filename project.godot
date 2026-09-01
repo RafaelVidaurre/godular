@@ -1,0 +1,22 @@
+; Engine configuration file.
+; Edit this file through the Godot editor when possible.
+
+config_version=5
+
+[application]
+
+config/name="Godular"
+config/features=PackedStringArray("4.7")
+
+[autoload]
+
+GdlrModuleManager="*res://addons/godular/singletons/module_manager/module_manager.gd"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godular/plugin.cfg", "res://addons/gut/plugin.cfg")
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

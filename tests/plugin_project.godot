@@ -1,0 +1,10 @@
+config_version=5
+
+[application]
+
+config/name="Godular Plugin Test"
+config/features=PackedStringArray("4.7")
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/plugin_enabler/plugin.cfg")
