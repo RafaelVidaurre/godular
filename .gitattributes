@@ -1,6 +1,11 @@
 * text=auto eol=lf
+
+# Downloaded archives (Asset Library downloads and GitHub zips) only ship
+# the addons users need, plus the README and LICENSE.
 /** export-ignore
 /addons !export-ignore
 /addons/** !export-ignore
 /addons/gut export-ignore
 /addons/gut/** export-ignore
+/README.md !export-ignore
+/LICENSE !export-ignore
