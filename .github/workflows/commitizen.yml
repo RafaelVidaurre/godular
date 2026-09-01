@@ -1,0 +1,48 @@
+name: Conventional Commits
+
+on:
+  pull_request:
+    types: [edited, opened, reopened, synchronize]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Conventional Commit Messages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install development tools
+        run: python -m pip install --requirement requirements-dev.txt
+
+      - name: Check pull-request title
+        if: github.event_name == 'pull_request'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: cz check --message "${PR_TITLE}"
+
+      - name: Check pull-request commits
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: cz check --rev-range "${BASE_SHA}..${HEAD_SHA}"
+
+      - name: Check pushed commits
+        if: github.event_name == 'push'
+        env:
+          BASE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: cz check --rev-range "${BASE_SHA}..${HEAD_SHA}"
