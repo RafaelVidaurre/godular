@@ -1,7 +1,10 @@
 class_name GdlrModuleGraph
 extends RefCounted
 
+## Compiles a tree of module definitions and runs its lifecycle.
+
 const ModuleHelpers = preload("res://addons/godular/helpers.gd")
+## Seconds a module `enable()` call can take before it fails.
 const DEFAULT_MODULE_ENABLE_TIMEOUT_S := 90.0
 
 var _root_module: GdlrModuleDefinition
@@ -17,6 +20,7 @@ func _init(root_module: Variant) -> void:
 	_unprocessed_root_module = root_module
 
 
+## Resolves module definitions and builds the dependency containers.
 func compile() -> GdPromise:
 	return _resolve_module_graph() \
 		.then(func(_res):
@@ -48,6 +52,7 @@ func start() -> GdPromise:
 	)
 
 
+## Returns the compiled module definitions keyed by module script.
 func get_module_definitions() -> Dictionary:
 	return _modules_definitions
 
@@ -532,6 +537,7 @@ func _normalize_module_definition(module: Variant) -> GdPromise:
 
 ## Base class for module-graph debug views.
 class DebugPlugin extends Control:
+	## Name shown in the debugger. Set by `register_debug_plugin`.
 	var plugin_name: String = ""
 
 	func _init(name: String = "Debug Plugin") -> void:
@@ -540,10 +546,12 @@ class DebugPlugin extends Control:
 	func _refresh() -> void:
 		pass
 
+	## Redraws the view. Override `_refresh` to implement it.
 	func refresh() -> void:
 		_refresh()
 
 
+## Registers a debug view under a unique name.
 func register_debug_plugin(plugin_name: String, plugin: DebugPlugin) -> void:
 	if _debug_plugins.has(plugin_name):
 		push_warning("Debug plugin '%s' is already registered and will be replaced." % plugin_name)
@@ -552,5 +560,6 @@ func register_debug_plugin(plugin_name: String, plugin: DebugPlugin) -> void:
 	_debug_plugins[plugin_name] = plugin
 
 
+## Returns the registered debug views keyed by name.
 func get_debug_plugins() -> Dictionary[String, DebugPlugin]:
 	return _debug_plugins

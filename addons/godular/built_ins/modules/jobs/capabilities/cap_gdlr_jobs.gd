@@ -1,6 +1,8 @@
 @abstract class_name CapGdlrJobs
 extends GdlrCapability
 
+## Capability that starts jobs and tracks their progress.
+
 
 enum JobStatus {
 	NONE = -1,

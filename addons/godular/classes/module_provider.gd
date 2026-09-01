@@ -1,8 +1,11 @@
 class_name GdlrModuleProvider
 extends RefCounted
 
+## Describes how a module creates the value for one token.
+
 const Helpers = preload("res://addons/godular/helpers.gd")
 
+## The token this provider satisfies.
 var token: Variant
 ## A value, script, or callable used to create the provided value.
 var use: Variant
@@ -19,6 +22,7 @@ func _init(token_: Variant, requires_: Array, use_: Variant, use_existing_: Vari
 	requires = requires_
 
 
+## Creates the provided value from the resolved dependencies.
 func resolve(resolved_dependencies: Array[Variant]) -> Variant:
 	if use_existing != null:
 		assert(resolved_dependencies.size() == 1, "use_existing providers should have exactly one dependency")

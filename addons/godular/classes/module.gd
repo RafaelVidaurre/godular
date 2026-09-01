@@ -1,6 +1,8 @@
 class_name GdlrModule
 extends RefCounted
 
+## Base class for modules. Declare `IMPORTS`, `EXPORTS`, `PROVIDERS`, and `TREE_EXPORTS` constants on subclasses.
+
 
 const ModuleHelpers = preload("res://addons/godular/helpers.gd")
 
