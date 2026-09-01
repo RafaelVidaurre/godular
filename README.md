@@ -1,10 +1,8 @@
 # Godular
 
-Modular architecture for Godot 4. Godular lets you split a game into modules that declare what they provide and what they depend on, then wires everything together for you: construction order, dependency injection, and async startup.
+Modular architecture for Godot. Godular lets you split a game into modules that declare what they provide and what they depend on, and it wires everything together for you.
 
 If your project has reached the point where autoloads reach into other autoloads and nobody remembers what has to initialize first, that is the problem Godular solves. You describe each part of your game as a module with imports, providers, and exports. Godular compiles them into a graph, builds every service exactly once, injects it wherever it is needed, and enables modules in dependency order, waiting for async work along the way.
-
-Built for Godot 4.7, written in GDScript, MIT licensed. Version 0.1.0, so expect the API to move.
 
 ## Getting started
 
