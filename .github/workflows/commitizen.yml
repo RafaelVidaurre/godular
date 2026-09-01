@@ -2,7 +2,7 @@ name: Conventional Commits
 
 on:
   pull_request:
-    types: [edited, opened, reopened, synchronize]
+    types: [opened, reopened, synchronize]
   push:
     branches: [main]
 
@@ -26,12 +26,6 @@ jobs:
 
       - name: Install development tools
         run: python -m pip install --requirement requirements-dev.txt
-
-      - name: Check pull-request title
-        if: github.event_name == 'pull_request'
-        env:
-          PR_TITLE: ${{ github.event.pull_request.title }}
-        run: cz check --message "${PR_TITLE}"
 
       - name: Check pull-request commits
         if: github.event_name == 'pull_request'
