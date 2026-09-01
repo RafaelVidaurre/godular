@@ -1,0 +1,10 @@
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+version_provider = "commitizen"
+version_scheme = "semver"
+version_files = ["addons/godular/plugin.cfg:version="]
+tag_format = "v$version"
+update_changelog_on_bump = true
+major_version_zero = true
+
