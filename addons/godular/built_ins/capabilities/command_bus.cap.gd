@@ -1,6 +1,8 @@
 @abstract class_name CapGdlrCommandBus
 extends GdlrCapability
 
+## Capability that dispatches commands and defines the command data types.
+
 
 enum CommandStatus {
 	NACK,

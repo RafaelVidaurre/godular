@@ -1,6 +1,7 @@
 extends RefCounted
 class_name GdlrCommandPipeline
 
+## Runs a command through prioritized before, around, after, and core-override callbacks.
 
 var _core: Callable
 var _before: Array[PipelineEntry] = []
@@ -9,34 +10,40 @@ var _after: Array[PipelineEntry] = []
 var _core_overrides: Array[PipelineEntry] = []
 var _next_insertion_order: int = 0
 
+## Sets the callback that handles the command.
 func set_core(fn: Callable) -> void:
 	_core = fn
 
 
+## The highest-priority matching override replaces the core callback.
 func set_core_override(fn: Callable, priority: int = 0, should_run: Callable = Callable()) -> void:
 	var e := PipelineEntry.new(fn, priority, _next_insertion_order, should_run)
 	_next_insertion_order += 1
 	_insert_sorted_core_override(e)
 
 
+## Before callbacks run by ascending priority, then insertion order.
 func use_before(fn: Callable, priority: int = 0, should_run: Callable = Callable()) -> void:
 	var e := PipelineEntry.new(fn, priority, _next_insertion_order, should_run)
 	_next_insertion_order += 1
 	_insert_sorted_before(e)
 
 
+## Around callbacks form an onion with lower priority on the outside.
 func use_around(fn: Callable, priority: int = 0, should_run: Callable = Callable()) -> void:
 	var e := PipelineEntry.new(fn, priority, _next_insertion_order, should_run)
 	_next_insertion_order += 1
 	_insert_sorted_around(e)
 
 
+## After callbacks may transform the result and run in ascending order.
 func use_after(fn: Callable, priority := 0, should_run := Callable()) -> void:
 	var e := PipelineEntry.new(fn, priority, _next_insertion_order, should_run)
 	_next_insertion_order += 1
 	_insert_sorted_after(e)
 
 
+## Registers each pipeline callback a middleware implements.
 func use(middleware: GdlrCommandMiddleware, priority := 0) -> void:
 	var has_methods := false
 	if middleware.has_method("_before"):
@@ -65,6 +72,7 @@ func use(middleware: GdlrCommandMiddleware, priority := 0) -> void:
 		return
 
 
+## Removes every pipeline entry that uses the given callback.
 func remove_by_callback(fn: Callable) -> void:
 	_before = _before.filter(func(entry: PipelineEntry): return entry.callback != fn)
 	_around = _around.filter(func(entry: PipelineEntry): return entry.callback != fn)
@@ -72,6 +80,7 @@ func remove_by_callback(fn: Callable) -> void:
 	_core_overrides = _core_overrides.filter(func(entry: PipelineEntry): return entry.callback != fn)
 
 
+## Runs the command envelope through the pipeline and returns the result.
 func run(envelope: CapGdlrCommandBus.CommandEnvelope, ctx: CapGdlrCommandHandlers.Context) -> Variant:
 	assert(_core.is_valid(), "GdlrCommandPipeline: core function not registered for command: %s." % envelope.command)
 
@@ -152,10 +161,15 @@ func _lower_bound(entries: Array, priority: int, insertion_order: int) -> int:
 	return lo
 
 
+## One registered pipeline callback with its ordering data.
 class PipelineEntry extends RefCounted:
+	## The registered callback.
 	var callback: Callable
+	## Sort key. Lower values run first.
 	var priority: int
+	## Tie breaker for entries with the same priority.
 	var insertion_order: int
+	## Optional predicate that decides if the entry runs.
 	var should_run: Callable = Callable()
 
 	func _init(callback: Callable, priority: int = 0, insertion_order: int = 0, should_run: Callable = Callable()) -> void:

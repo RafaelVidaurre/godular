@@ -1,7 +1,11 @@
 @tool
 extends Node
 
+## Autoload singleton that mounts, starts, and queries the module graph.
+
+## Emitted after `mount()` compiles the graph.
 signal graph_mounted(graph: GdlrModuleGraph)
+## Emitted after `start()` enables all modules.
 signal graph_started(graph: GdlrModuleGraph)
 
 const Settings := preload("res://addons/godular/settings.gd")
@@ -31,6 +35,7 @@ func mount(root_module: Variant) -> void:
 	graph_mounted.emit(_graph)
 
 
+## Starts the mounted module graph.
 func start() -> void:
 	await _graph.start().catch(func(error):
 		assert(false, "Failed to start module graph: %s" % error)
@@ -39,15 +44,18 @@ func start() -> void:
 	graph_started.emit(_graph)
 
 
+## Returns the mounted module graph, or null before `mount()`.
 func get_graph() -> GdlrModuleGraph:
 	return _graph
 
 
+## Returns true when the editor module graph is mounted. Editor only.
 func editor_is_graph_ready() -> bool:
 	assert(Engine.is_editor_hint(), "editor_is_graph_ready() can only be called in editor")
 	return _graph != null
 
 
+## Waits until the editor module graph is mounted. Editor only.
 func editor_await_graph_ready() -> void:
 	assert(Engine.is_editor_hint(), "editor_await_graph_ready() can only be called in editor")
 
@@ -56,6 +64,7 @@ func editor_await_graph_ready() -> void:
 		await tree.process_frame
 
 
+## Waits until the editor module graph is started. Editor only.
 func editor_await_graph_started() -> void:
 	assert(Engine.is_editor_hint(), "editor_await_graph_started() can only be called in editor")
 

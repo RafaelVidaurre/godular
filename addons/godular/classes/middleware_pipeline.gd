@@ -16,10 +16,12 @@ func _init(core_ := Callable()) -> void:
 		set_core(core_)
 
 
+## Sets the callback the pipeline wraps.
 func set_core(fn: Callable) -> void:
 	_core = fn
 
 
+## Returns the core callback.
 func get_core() -> Callable:
 	return _core
 
@@ -52,6 +54,7 @@ func use_after(fn: Callable, priority: int = 0, should_run: Callable = Callable(
 	_insert_sorted_after(e)
 
 
+## Removes every pipeline entry that uses the given callback.
 func remove_by_callback(fn: Callable) -> void:
 	_before = _before.filter(func(entry: PipelineEntry): return entry.callback != fn)
 	_around = _around.filter(func(entry: PipelineEntry): return entry.callback != fn)
@@ -59,6 +62,7 @@ func remove_by_callback(fn: Callable) -> void:
 	_core_overrides = _core_overrides.filter(func(entry: PipelineEntry): return entry.callback != fn)
 
 
+## Runs the arguments through the pipeline and returns the result.
 func run(...args) -> Variant:
 	assert(_core.is_valid(), "GdlrMiddlewarePipeline core not set")
 
@@ -143,10 +147,15 @@ func _lower_bound(entries: Array, priority: int, insertion_order: int) -> int:
 				lo = mid + 1
 	return lo
 
+## One registered pipeline callback with its ordering data.
 class PipelineEntry extends RefCounted:
+	## The registered callback.
 	var callback: Callable
+	## Sort key. Lower values run first.
 	var priority: int
+	## Tie breaker for entries with the same priority.
 	var insertion_order: int
+	## Optional predicate that decides if the entry runs.
 	var should_run: Callable = Callable()
 
 	func _init(cb: Callable, prio: int = 0, ins_order: int = 0, should: Callable = Callable()) -> void:
@@ -156,6 +165,7 @@ class PipelineEntry extends RefCounted:
 		should_run = should
 
 
+	## Calls the callback with the given arguments and awaits the result.
 	func run_callback(...args) -> Variant:
 		# Binding first keeps callback signature errors visible.
 		var bound_fn: Callable = callback.bindv(args)

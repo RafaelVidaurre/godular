@@ -6,10 +6,12 @@ var _instances_cache: Dictionary[Variant, Variant] = {}
 var _provider_factories: Dictionary[Variant, ProviderFactory] = {}
 
 
+## Registers a provider factory for a token.
 func add_provider_factory(token: Variant, provider: ProviderFactory) -> void:
 	_provider_factories[token] = provider
 
 
+## Resolves a token asynchronously and caches the value.
 func resolve(token: Variant) -> GdPromise:
 	var token_name = _get_token_name(token)
 
@@ -26,6 +28,7 @@ func resolve(token: Variant) -> GdPromise:
 		return value
 	)
 
+## Resolves a token synchronously. All providers in the chain must be synchronous.
 func resolve_sync(token: Variant) -> Variant:
 	var token_name = _get_token_name(token)
 
@@ -44,6 +47,7 @@ func _get_token_name(token: Variant) -> String:
 	return str(token)
 
 
+## Resolves one provider definition together with its dependencies.
 class ProviderFactory extends RefCounted:
 	var _dependency_providers: Dictionary[Variant, ProviderFactory] = {}
 	var _provider_definition: GdlrModuleProvider
@@ -55,6 +59,7 @@ class ProviderFactory extends RefCounted:
 		_owner_container = owner_container
 
 
+	## Resolves the dependencies, then the provider value.
 	func resolve() -> GdPromise:
 		var dependency_promises: Array[GdPromise] = []
 		for required_token in _provider_definition.requires:
@@ -68,6 +73,7 @@ class ProviderFactory extends RefCounted:
 			return _provider_definition.resolve(dependencies)
 		)
 
+	## Resolves the dependencies and the provider value synchronously.
 	func resolve_sync() -> Variant:
 		var dependency_values: Array[Variant] = []
 		for required_token in _provider_definition.requires:

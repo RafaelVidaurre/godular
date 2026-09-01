@@ -1,6 +1,8 @@
 @abstract class_name CapGdlrCommandHandlers
 extends GdlrCapability
 
+## Capability that registers and runs local command handlers.
+
 
 @abstract func run(envelope: CapGdlrCommandBus.CommandEnvelope, ctx: Context) -> Variant
 @abstract func set_core(command: GDScript, core: Callable) -> void
