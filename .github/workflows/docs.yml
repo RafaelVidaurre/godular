@@ -1,0 +1,39 @@
+name: API Reference
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Generated API Reference
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+
+      - name: Install ug
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf \
+            https://github.com/RafaelVidaurre/use-godot/releases/latest/download/use-godot-installer.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install Godot
+        run: ug install "$(tr -d '[:space:]' < .ugrc)"
+
+      - name: Regenerate the API reference
+        run: bash tools/generate_docs.sh
+
+      - name: Fail when docs/reference is stale
+        run: |
+          git add --all docs/reference
+          if ! git diff --cached --quiet -- docs/reference; then
+            echo "docs/reference is stale. Run tools/generate_docs.sh and commit the result."
+            git diff --cached -- docs/reference
+            exit 1
+          fi
