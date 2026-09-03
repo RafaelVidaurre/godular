@@ -22,7 +22,7 @@ Or manually:
 2. Copy the `addons` folder into your project.
 3. Enable "Godular" under Project settings, then Plugins.
 
-Every download already contains everything Godular needs. Its one dependency, the [GdPromise](addons/gd_promise) promise library, is developed in this repository and ships in `addons/gd_promise` alongside the plugin, so there is nothing to install separately.
+Every download already contains everything Godular needs. Its one dependency, the [GdPromise](../gd_promise) promise library, is developed in this repository and ships in `addons/gd_promise` alongside the plugin, so there is nothing to install separately.
 
 Enabling the plugin adds a `GdlrModuleManager` autoload, which is how you mount and start your modules.
 
@@ -95,7 +95,7 @@ Modules compose through `IMPORTS`: a module can import other modules and consume
 
 ## Documentation
 
-The full API documentation is generated from the doc comments in the source and lives in [docs/reference](docs/reference/README.md). You can also browse it from inside Godot: with the plugin enabled, every Godular class shows up in the editor's built-in help (F1).
+The full API documentation is generated from the doc comments in the source and lives in [docs/reference](https://github.com/RafaelVidaurre/godular/blob/main/docs/reference/README.md). You can also browse it from inside Godot: with the plugin enabled, every Godular class shows up in the editor's built-in help (F1).
 
 ## Running the tests
 
@@ -107,7 +107,7 @@ tests/run.sh
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Commits follow Conventional Commits; the details are in [docs/git-guidance.md](docs/git-guidance.md).
+See [CONTRIBUTING.md](https://github.com/RafaelVidaurre/godular/blob/main/CONTRIBUTING.md). Commits follow Conventional Commits; the details are in [docs/git-guidance.md](https://github.com/RafaelVidaurre/godular/blob/main/docs/git-guidance.md).
 
 ## License
 
