@@ -3,3 +3,4 @@
 /.venv/
 /.gut_editor_config.json
 *.translation
+/.claude/settings.local.json
