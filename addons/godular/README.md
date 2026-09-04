@@ -22,7 +22,7 @@ Or manually:
 2. Copy the `addons` folder into your project.
 3. Enable "Godular" under Project settings, then Plugins.
 
-Every download already contains everything Godular needs. Its one dependency, the [GdPromise](../gd_promise) promise library, is developed in this repository and ships in `addons/gd_promise` alongside the plugin, so there is nothing to install separately.
+Every download already contains everything Godular needs. Its one dependency, the [GdPromise](https://github.com/RafaelVidaurre/gd-better-promises) promise library, is developed in its own repository and vendored here at a pinned version, so it ships in `addons/gd_promise` alongside the plugin and there is nothing to install separately.
 
 Enabling the plugin adds a `GdlrModuleManager` autoload, which is how you mount and start your modules.
 
