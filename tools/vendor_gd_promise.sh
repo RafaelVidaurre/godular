@@ -10,6 +10,9 @@
 # then commit the result.
 set -euo pipefail
 
+# Fix collation so the checksum file has the same line order on every machine.
+export LC_ALL=C
+
 repository_root=$(cd "$(dirname "$0")/.." && pwd)
 cd "$repository_root"
 
@@ -51,6 +54,7 @@ cp -R "$source" addons/gd_promise
 
 # The checksum file guards the vendored copy against local edits. Test runs
 # verify it, so regenerate it here whenever the content changes.
-shasum -a 256 addons/gd_promise/* > tests/dependencies.sha256
+find addons/gd_promise -type f -print0 | sort -z | xargs -0 shasum -a 256 \
+	> tests/dependencies.sha256
 
 echo "Vendored gd_promise $tag ($commit)"
