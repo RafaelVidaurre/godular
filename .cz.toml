@@ -2,9 +2,10 @@
 name = "cz_conventional_commits"
 version = "0.1.0"
 version_provider = "commitizen"
-version_scheme = "semver"
+version_scheme = "semver2"
 version_files = ["addons/godular/plugin.cfg:version="]
 tag_format = "v$version"
+annotated_tag = true
 update_changelog_on_bump = true
 major_version_zero = true
-
+bump_message = "chore(release): v$current_version to v$new_version"
