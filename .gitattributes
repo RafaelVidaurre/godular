@@ -1,11 +1,10 @@
 * text=auto eol=lf
 
-# Downloaded archives (Asset Library downloads and GitHub zips) only ship
-# the addons users need, plus the README and LICENSE.
+# Downloaded archives (Asset Store downloads and GitHub zips) ship only the
+# addons folder. The readme and license travel inside the addon folders
+# themselves, so nothing lands at the root of a user's project.
 /** export-ignore
 /addons !export-ignore
 /addons/** !export-ignore
 /addons/gut export-ignore
 /addons/gut/** export-ignore
-/README.md !export-ignore
-/LICENSE !export-ignore
