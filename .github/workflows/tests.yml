@@ -1,0 +1,47 @@
+name: Tests
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  gut:
+    name: GUT on Godot ${{ matrix.godot }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        godot: ["4.5.2-stable", "4.6.3-stable", "4.7.1-stable"]
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+
+      - name: Install zsh
+        run: sudo apt-get update && sudo apt-get install --yes zsh
+
+      - name: Install ug
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf \
+            https://github.com/RafaelVidaurre/use-godot/releases/latest/download/use-godot-installer.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install Godot ${{ matrix.godot }}
+        run: ug install "${{ matrix.godot }}@standard"
+
+      - name: Run the test suite
+        env:
+          GODOT_SELECTOR: ${{ matrix.godot }}@standard
+        run: zsh tests/run.sh
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-logs-${{ matrix.godot }}
+          path: .godot/*.log
+          if-no-files-found: ignore
