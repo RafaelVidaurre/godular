@@ -1,26 +1,45 @@
 class_name GdlrModuleGraph
 extends RefCounted
+## Compiles a module tree and runs its lifecycle.
+##
+## [GdlrModuleManager] creates and drives the graph for you. Use the graph
+## directly when you need more than one graph, for example in tests:
+## [codeblock]
+## var graph := GdlrModuleGraph.new(GameModule)
+## await graph.compile().await_resolved()
+## await graph.start().await_resolved()
+## var score: CapScore = graph.request(CapScore)
+## [/codeblock]
+## See [GdlrModule] for the lifecycle that the graph runs.
+##
+## @tutorial(Modules): https://rafaelvidaurre.github.io/godular/guide/modules.html
+## @tutorial(Editor): https://rafaelvidaurre.github.io/godular/guide/editor.html
 
-## Compiles a tree of module definitions and runs its lifecycle.
-
-const ModuleHelpers = preload("res://addons/godular/helpers.gd")
-## Seconds a module `enable()` call can take before it fails.
+const _ModuleHelpers = preload("res://addons/godular/helpers.gd")
+## Seconds that one [method GdlrModule.enable] call can take. After this
+## time [method start] reports an error, stops the assertion in debug
+## builds, and continues with the next module.
 const DEFAULT_MODULE_ENABLE_TIMEOUT_S := 90.0
 
 var _root_module: GdlrModuleDefinition
 var _modules_definitions: Dictionary[GDScript, GdlrModuleDefinition] = {}
 var _module_instances: Dictionary[GDScript, GdlrModule] = {}
+var _pending_mounts: Dictionary[GDScript, GdPromise] = {}
 var _unprocessed_root_module: Variant
 var _module_containers: Dictionary[GDScript, GdlrDiContainer] = {}
 var _tree_exports_providers: Dictionary[Variant, Dictionary] = {}
 var _debug_plugins: Dictionary[String, DebugPlugin] = {}
 
 
+## Creates a graph. [param root_module] is a module script or a
+## [GdlrModuleDefinition].
 func _init(root_module: Variant) -> void:
 	_unprocessed_root_module = root_module
 
 
-## Resolves module definitions and builds the dependency containers.
+## Resolves every module definition from the root module, checks the tree
+## exports, and builds one dependency container per module. Call it before
+## [method start].
 func compile() -> GdPromise:
 	return _resolve_module_graph() \
 		.then(func(_res):
@@ -43,7 +62,10 @@ func compile() -> GdPromise:
 	)
 
 
-## Mounts providers, resolves tree exports, and enables modules.
+## Creates every module, injects dependencies, calls
+## [method GdlrModule.register], resolves every tree export, and then calls
+## [method GdlrModule.enable] in dependency order. The promise resolves after
+## the last [method GdlrModule.enable] call returns.
 func start() -> GdPromise:
 	return _mount_all_modules().then(func(_res):
 		return _resolve_tree_exports()
@@ -53,15 +75,19 @@ func start() -> GdPromise:
 
 
 ## Returns the compiled module definitions keyed by module script.
+## Available after [method compile].
 func get_module_definitions() -> Dictionary:
 	return _modules_definitions
 
 
-## Returns an eagerly resolved tree export.
+## Returns the value of a tree export. Call it after [method start]. Before
+## that, the export is not resolved and the method returns
+## [code]null[/code]. Outside the editor it also reports an error.
+## [param _consumer_node] only names the requester in error messages.
 func request(capability: Variant, _consumer_node: Node = null) -> Variant:
 	if not capability in _tree_exports_providers:
 		var requester := str(_consumer_node.get_path()) if _consumer_node else "unknown requester"
-		var message := "Tree export %s not found (%s). Add it to the providing module's TREE_EXPORTS." % [ModuleHelpers.get_token_name(capability), requester]
+		var message := "Tree export %s not found (%s). Add it to the providing module's TREE_EXPORTS." % [_ModuleHelpers.get_token_name(capability), requester]
 		push_error(message)
 		assert(false, message)
 		return null
@@ -72,7 +98,7 @@ func request(capability: Variant, _consumer_node: Node = null) -> Variant:
 
 	if not container._instances_cache.has(capability):
 		if not Engine.is_editor_hint():
-			var message := "Tree export %s was not eagerly resolved" % ModuleHelpers.get_token_name(capability)
+			var message := "Tree export %s was not eagerly resolved" % _ModuleHelpers.get_token_name(capability)
 			push_error(message)
 			assert(false, message)
 			return null
@@ -89,7 +115,10 @@ func _resolve_sync(capability: Variant) -> Variant:
 	return container.resolve_sync(capability)
 
 
-## Maps typed capability properties and `INJECT` entries to provider tokens.
+## Returns the dependencies that [param ObjectScript] declares, as a
+## dictionary from property name to token. It reads typed properties whose
+## type extends [GdlrCapability] and the entries of a static
+## [code]INJECT[/code] array. See [GdlrModule].
 func get_init_dependencies(ObjectScript: GDScript) -> Dictionary:
 	var init_dependencies := {}
 
@@ -207,7 +236,7 @@ func _process_module_imports(definition: GdlrModuleDefinition) -> GdPromise:
 		for index in range(normalized_imports.size()):
 			var normalized_import = normalized_imports[index]
 			if normalized_import == null:
-				reject.call("Import is null for module %s at index %d. This might be caused by an error in a for_root() call" % [ModuleHelpers.get_module_name(definition.ModuleScript), index])
+				reject.call("Import is null for module %s at index %d. This might be caused by an error in a for_root() call" % [_ModuleHelpers.get_module_name(definition.ModuleScript), index])
 				return
 
 			if normalized_import is GdlrModuleDefinition:
@@ -226,13 +255,13 @@ func _build_tree_exports_registry() -> void:
 		for token in tree_exports.keys():
 			if token in _tree_exports_providers:
 				var existing_module: GDScript = _tree_exports_providers[token]["module_script"]
-				push_error("Tree export %s is declared by both %s and %s" % [ModuleHelpers.get_token_name(token), ModuleHelpers.get_module_name(existing_module), ModuleHelpers.get_module_name(module_script)])
+				push_error("Tree export %s is declared by both %s and %s" % [_ModuleHelpers.get_token_name(token), _ModuleHelpers.get_module_name(existing_module), _ModuleHelpers.get_module_name(module_script)])
 				continue
 
 			var provider_info := _find_provider_for_token(module_script, token)
 
 			if provider_info.is_empty():
-				push_error("Tree export %s in module %s has no visible provider" % [ModuleHelpers.get_token_name(token), ModuleHelpers.get_module_name(module_script)])
+				push_error("Tree export %s in module %s has no visible provider" % [_ModuleHelpers.get_token_name(token), _ModuleHelpers.get_module_name(module_script)])
 				continue
 
 			_tree_exports_providers[token] = provider_info
@@ -285,7 +314,7 @@ func _resolve_tree_exports() -> GdPromise:
 				if promise.is_rejected:
 					var provider_info: Dictionary = _tree_exports_providers[token]
 					var provider_module_script: GDScript = provider_info["module_script"]
-					push_error("Failed to resolve tree export %s from module %s: %s" % [ModuleHelpers.get_token_name(token), ModuleHelpers.get_module_name(provider_module_script), promise.value])
+					push_error("Failed to resolve tree export %s from module %s: %s" % [_ModuleHelpers.get_token_name(token), _ModuleHelpers.get_module_name(provider_module_script), promise.value])
 
 			reject.call(all_resolved.value)
 		else:
@@ -300,14 +329,14 @@ func _create_provider_factory(provider: GdlrModuleProvider, provider_module_scri
 		var dep_provider_info := _find_provider_for_token(provider_module_script, required_token)
 
 		if dep_provider_info.is_empty():
-			push_error("Cannot find provider %s required by module %s" % [ModuleHelpers.get_token_name(required_token), ModuleHelpers.get_module_name(provider_module_script)])
-			assert(false, "Cannot find provider for dependency token %s required by provider in module %s" % [ModuleHelpers.get_token_name(required_token), ModuleHelpers.get_module_name(provider_module_script)])
+			push_error("Cannot find provider %s required by module %s" % [_ModuleHelpers.get_token_name(required_token), _ModuleHelpers.get_module_name(provider_module_script)])
+			assert(false, "Cannot find provider for dependency token %s required by provider in module %s" % [_ModuleHelpers.get_token_name(required_token), _ModuleHelpers.get_module_name(provider_module_script)])
 			continue
 
 		var dep_provider: GdlrModuleProvider = dep_provider_info["provider"]
 		var dep_module_script: GDScript = dep_provider_info["module_script"]
 
-		assert(_module_containers.has(dep_module_script), "Container for module %s not found when building factory for %s" % [ModuleHelpers.get_module_name(dep_module_script), ModuleHelpers.get_token_name(provider.token)])
+		assert(_module_containers.has(dep_module_script), "Container for module %s not found when building factory for %s" % [_ModuleHelpers.get_module_name(dep_module_script), _ModuleHelpers.get_token_name(provider.token)])
 		var dep_container := _module_containers[dep_module_script]
 
 		var dep_factory := _create_provider_factory(dep_provider, dep_module_script, dep_container)
@@ -320,7 +349,7 @@ func _find_provider_for_token(module_script: GDScript, token: Variant) -> Dictio
 	var module_definition := _modules_definitions.get(module_script, null)
 
 	if not module_definition:
-		push_error("Module %s is unavailable while resolving %s" % [ModuleHelpers.get_module_name(module_script), ModuleHelpers.get_token_name(token)])
+		push_error("Module %s is unavailable while resolving %s" % [_ModuleHelpers.get_module_name(module_script), _ModuleHelpers.get_token_name(token)])
 		return {}
 
 	var providers_dict: Dictionary[Variant, Dictionary] = module_definition.get_providers()
@@ -347,7 +376,7 @@ func _find_provider_for_token(module_script: GDScript, token: Variant) -> Dictio
 		var imported_definition := _modules_definitions.get(imported_module_script, null)
 
 		if not imported_definition:
-			push_error("Imported module %s is unavailable while resolving %s" % [ModuleHelpers.get_module_name(imported_module_script), ModuleHelpers.get_token_name(token)])
+			push_error("Imported module %s is unavailable while resolving %s" % [_ModuleHelpers.get_module_name(imported_module_script), _ModuleHelpers.get_token_name(token)])
 			continue
 
 		var exported_tokens: Dictionary[Variant, bool] = imported_definition.get_exports()
@@ -377,11 +406,12 @@ func _mount_all_modules() -> GdPromise:
 
 
 func _mount_module(ModuleScript: GDScript) -> GdPromise:
-	return GdPromise.new(func(resolve, reject):
-		if ModuleScript in _module_instances:
-			resolve.call(_module_instances[ModuleScript])
-			return
+	if ModuleScript in _module_instances:
+		return GdPromise.new_resolved(_module_instances[ModuleScript])
+	if ModuleScript in _pending_mounts:
+		return _pending_mounts[ModuleScript]
 
+	var mount := GdPromise.new(func(resolve, reject):
 		var module_definition := _modules_definitions[ModuleScript]
 		var imports: Dictionary[GDScript, GdlrModuleDefinition] = module_definition.get_imports()
 
@@ -417,7 +447,7 @@ func _mount_module(ModuleScript: GDScript) -> GdPromise:
 			else:
 				var provider_info := _find_provider_for_token(ModuleScript, token)
 				if provider_info.is_empty():
-					var err_msg := "Cannot resolve init dependency '%s' for module '%s' - no provider found" % [ModuleHelpers.get_token_name(token), ModuleHelpers.get_module_name(ModuleScript)]
+					var err_msg := "Cannot resolve init dependency '%s' for module '%s' - no provider found" % [_ModuleHelpers.get_token_name(token), _ModuleHelpers.get_module_name(ModuleScript)]
 					push_error(err_msg)
 					assert(false, err_msg)
 					reject.call(err_msg)
@@ -434,7 +464,7 @@ func _mount_module(ModuleScript: GDScript) -> GdPromise:
 			await all_dependencies.await_settled()
 
 			if all_dependencies.is_rejected:
-				push_error("Failed to resolve dependencies for module %s: %s" % [ModuleHelpers.get_module_name(ModuleScript), all_dependencies.value])
+				push_error("Failed to resolve dependencies for module %s: %s" % [_ModuleHelpers.get_module_name(ModuleScript), all_dependencies.value])
 				reject.call(all_dependencies.value)
 				return
 
@@ -445,12 +475,15 @@ func _mount_module(ModuleScript: GDScript) -> GdPromise:
 				module[property_name] = resolved_value
 
 		_module_instances[ModuleScript] = module
+		_pending_mounts.erase(ModuleScript)
 
-		if module.has_method("register"):
-			module.register()
+		module.register()
 
 		resolve.call(module)
 	)
+	if not mount.is_settled:
+		_pending_mounts[ModuleScript] = mount
+	return mount
 
 func _get_modules_in_dependency_order() -> Array[GDScript]:
 	var visited: Dictionary[GDScript, bool] = {}
@@ -494,8 +527,8 @@ func _enable_all_modules() -> void:
 		])
 		await promise.await_settled()
 		if promise.is_rejected:
-			push_error("Module %s 'enable' timed out" % ModuleHelpers.get_module_name(module_script))
-			assert(false, "Module %s 'enable' timed out" % ModuleHelpers.get_module_name(module_script))
+			push_error("Module %s 'enable' timed out" % _ModuleHelpers.get_module_name(module_script))
+			assert(false, "Module %s 'enable' timed out" % _ModuleHelpers.get_module_name(module_script))
 
 
 func _normalize_module_definition(module: Variant) -> GdPromise:
@@ -518,7 +551,7 @@ func _normalize_module_definition(module: Variant) -> GdPromise:
 		for index in range(imports.size()):
 			var import_token = imports[index]
 			if import_token == null:
-				return GdPromise.new_rejected("Import is null for module %s at index %d. This might be caused by an error in a for_root() call" % [ModuleHelpers.get_module_name(module.ModuleScript), index])
+				return GdPromise.new_rejected("Import is null for module %s at index %d. This might be caused by an error in a for_root() call" % [_ModuleHelpers.get_module_name(module.ModuleScript), index])
 
 		module.imports(imports)
 		module.exports(exports)
@@ -535,23 +568,32 @@ func _normalize_module_definition(module: Variant) -> GdPromise:
 
 	return _normalize_module_definition(module_definition)
 
-## Base class for module-graph debug views.
+## Base class for debug views of a module graph.
+##
+## Godular does not ship a debugger. A debug plugin is a [Control] that an
+## external tool can show. Modules register plugins with
+## [method GdlrModule.register_debug_plugin], and the tool reads them with
+## [method GdlrModuleGraph.get_debug_plugins].
 class DebugPlugin extends Control:
-	## Name shown in the debugger. Set by `register_debug_plugin`.
+	## Name shown by the tool. [method GdlrModuleGraph.register_debug_plugin]
+	## sets it.
 	var plugin_name: String = ""
 
+	## Creates a debug view named [param name].
 	func _init(name: String = "Debug Plugin") -> void:
 		plugin_name = name
 
+	## Override it to redraw the view.
 	func _refresh() -> void:
 		pass
 
-	## Redraws the view. Override `_refresh` to implement it.
+	## Redraws the view by calling [method _refresh].
 	func refresh() -> void:
 		_refresh()
 
 
-## Registers a debug view under a unique name.
+## Registers [param plugin] under [param plugin_name]. A later call with the
+## same name replaces the plugin and reports a warning.
 func register_debug_plugin(plugin_name: String, plugin: DebugPlugin) -> void:
 	if _debug_plugins.has(plugin_name):
 		push_warning("Debug plugin '%s' is already registered and will be replaced." % plugin_name)
@@ -560,6 +602,6 @@ func register_debug_plugin(plugin_name: String, plugin: DebugPlugin) -> void:
 	_debug_plugins[plugin_name] = plugin
 
 
-## Returns the registered debug views keyed by name.
+## Returns the registered debug plugins keyed by name.
 func get_debug_plugins() -> Dictionary[String, DebugPlugin]:
 	return _debug_plugins

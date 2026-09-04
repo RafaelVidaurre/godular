@@ -1,0 +1,44 @@
+/* Layout for the class reference pages that Godot's make_rst.py generates. */
+
+.classref-reftable-group table.docutils {
+	width: 100%;
+	table-layout: auto;
+}
+
+.classref-reftable-group table.docutils td {
+	white-space: normal;
+	vertical-align: top;
+}
+
+.classref-reftable-group table.docutils td:first-child {
+	white-space: nowrap;
+	text-align: right;
+	color: var(--color-foreground-muted);
+}
+
+.classref-descriptions-group .classref-method,
+.classref-descriptions-group .classref-property,
+.classref-descriptions-group .classref-signal,
+.classref-descriptions-group .classref-enumeration,
+.classref-descriptions-group .classref-constant,
+.classref-descriptions-group .classref-enumeration-constant {
+	font-family: var(--font-stack--monospace);
+	font-size: var(--font-size--small);
+	padding: 0.5em 0.75em;
+	border-left: 3px solid var(--color-brand-primary);
+	background: var(--color-background-secondary);
+	border-radius: 0.25rem;
+}
+
+.classref-section-separator,
+.classref-item-separator {
+	display: none;
+}
+
+.classref-descriptions-group .classref-enumeration-constant {
+	margin-left: 1.5em;
+}
+
+.contribute {
+	display: none;
+}

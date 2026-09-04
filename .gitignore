@@ -1,6 +1,8 @@
 /.godot/
 /.crew/
 /.venv/
+/docs/_build/
+/docs/api/classes/
 /.gut_editor_config.json
 *.translation
 /.claude/settings.local.json
