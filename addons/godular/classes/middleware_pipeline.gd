@@ -1,7 +1,33 @@
 class_name GdlrMiddlewarePipeline
 extends RefCounted
-
-## Runs prioritized before, around, after, and conditional core-override callbacks.
+## Wraps a core callable with before, around, after, and override callbacks.
+##
+## Create a pipeline around any callable and run it with the same arguments
+## as the callable:
+## [codeblock]
+## var pipeline := GdlrMiddlewarePipeline.new(func(amount: int): return amount + 1)
+## pipeline.use_before(func(amount: int): print("adding ", amount))
+## pipeline.use_around(func(next: Callable, amount: int): return await next.call(amount * 2))
+## pipeline.use_after(func(result: int, amount: int): return result * 3)
+## var result = await pipeline.run(2)  # 15
+## [/codeblock]
+## Callback signatures, where [code]args[/code] are the arguments passed to
+## [method run]:[br]
+## - before: [code]func(args...)[/code]. Return values are ignored.[br]
+## - around: [code]func(next: Callable, args...)[/code]. Call [code]next[/code]
+## with the arguments to continue and return its result.[br]
+## - after: [code]func(result, args...)[/code]. Return the result to pass on.[br]
+## - core and core override: [code]func(args...)[/code].[br]
+## - should_run: [code]func(args...) -> bool[/code].[br]
+## The core and around callbacks can [code]await[/code]. Before and after
+## callbacks run without [code]await[/code] and must return without waiting.
+## [br][br]
+## [b]Order.[/b] Before and after callbacks run by ascending priority, then by
+## insertion order. Around callbacks form layers. The callback with the lowest
+## priority is the outer layer. Among core overrides whose predicate matches,
+## the one with the highest priority replaces the core.
+##
+## @tutorial(Middleware): https://rafaelvidaurre.github.io/godular/guide/middleware.html
 
 var _core: Callable
 var _before: Array[PipelineEntry] = []
@@ -11,50 +37,53 @@ var _core_overrides: Array[PipelineEntry] = []
 var _next_insertion_order: int = 0
 
 
+## Creates a pipeline. [param core_] is optional. Set it later with
+## [method set_core].
 func _init(core_ := Callable()) -> void:
 	if core_.is_valid():
 		set_core(core_)
 
 
-## Sets the callback the pipeline wraps.
+## Sets the callable that the pipeline wraps.
 func set_core(fn: Callable) -> void:
 	_core = fn
 
 
-## Returns the core callback.
+## Returns the callable that the pipeline wraps.
 func get_core() -> Callable:
 	return _core
 
 
-## The highest-priority matching override replaces the core callback.
+## Adds a callable that replaces the core when [param should_run] returns
+## true. An override without a predicate always matches.
 func set_core_override(fn: Callable, priority: int = 0, should_run: Callable = Callable()) -> void:
 	var e := PipelineEntry.new(fn, priority, _next_insertion_order, should_run)
 	_next_insertion_order += 1
 	_insert_sorted_core_override(e)
 
 
-## Before callbacks run by ascending priority, then insertion order.
+## Adds a callback that runs before the core.
 func use_before(fn: Callable, priority: int = 0, should_run: Callable = Callable()) -> void:
 	var e := PipelineEntry.new(fn, priority, _next_insertion_order, should_run)
 	_next_insertion_order += 1
 	_insert_sorted_before(e)
 
 
-## Around callbacks form an onion with lower priority on the outside.
+## Adds a callback that wraps the core.
 func use_around(fn: Callable, priority: int = 0, should_run: Callable = Callable()) -> void:
 	var e := PipelineEntry.new(fn, priority, _next_insertion_order, should_run)
 	_next_insertion_order += 1
 	_insert_sorted_around(e)
 
 
-## After callbacks may transform the result and run in ascending order.
+## Adds a callback that runs after the core and can replace the result.
 func use_after(fn: Callable, priority: int = 0, should_run: Callable = Callable()) -> void:
 	var e := PipelineEntry.new(fn, priority, _next_insertion_order, should_run)
 	_next_insertion_order += 1
 	_insert_sorted_after(e)
 
 
-## Removes every pipeline entry that uses the given callback.
+## Removes every callback and override that uses [param fn].
 func remove_by_callback(fn: Callable) -> void:
 	_before = _before.filter(func(entry: PipelineEntry): return entry.callback != fn)
 	_around = _around.filter(func(entry: PipelineEntry): return entry.callback != fn)
@@ -62,7 +91,8 @@ func remove_by_callback(fn: Callable) -> void:
 	_core_overrides = _core_overrides.filter(func(entry: PipelineEntry): return entry.callback != fn)
 
 
-## Runs the arguments through the pipeline and returns the result.
+## Runs the arguments through the pipeline and returns the final result.
+## Fails when no core is set.
 func run(...args) -> Variant:
 	assert(_core.is_valid(), "GdlrMiddlewarePipeline core not set")
 
@@ -147,7 +177,9 @@ func _lower_bound(entries: Array, priority: int, insertion_order: int) -> int:
 				lo = mid + 1
 	return lo
 
-## One registered pipeline callback with its ordering data.
+## One registered callback with its ordering data.
+##
+## [b]Internal.[/b] The pipeline creates entries. User code does not.
 class PipelineEntry extends RefCounted:
 	## The registered callback.
 	var callback: Callable
@@ -165,7 +197,8 @@ class PipelineEntry extends RefCounted:
 		should_run = should
 
 
-	## Calls the callback with the given arguments and awaits the result.
+	## Calls [member callback] with the given arguments and returns the
+	## awaited result.
 	func run_callback(...args) -> Variant:
 		# Binding first keeps callback signature errors visible.
 		var bound_fn: Callable = callback.bindv(args)

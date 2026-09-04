@@ -11,6 +11,7 @@ const SvcCommandBus = preload("res://addons/godular/built_ins/services/command_b
 const RegJobs = preload("res://addons/godular/built_ins/modules/jobs/registries/reg_jobs.gd")
 const SvcJobs = preload("res://addons/godular/built_ins/modules/jobs/services/svc_jobs.gd")
 const JobsModule = preload("res://addons/godular/built_ins/modules/jobs/md_jobs.gd")
+const DiamondRoot = preload("res://tests/fixtures/diamond_root.gd")
 
 
 class FakeTransport extends CapGdlrCommandTransport:
@@ -347,3 +348,29 @@ func _make_envelope(exec_kind: CapGdlrCommandBus.ExecKind = CapGdlrCommandBus.Ex
 	meta.id = &"command-1"
 	meta.route = CapGdlrCommandBus.CommandRoute.new(exec_kind, &"server")
 	return CapGdlrCommandBus.CommandEnvelope.new(command, meta)
+
+
+func test_async_provider_and_shared_module_are_built_once() -> void:
+	var state := {"calls": 0}
+	var provider := GdlrModuleProvider.new(&"slow", [], func():
+		state.calls += 1
+		return GdPromise.new(func(resolve: Callable, _reject: Callable) -> void:
+			await get_tree().process_frame
+			resolve.call("value")
+		)
+	)
+	var container := GdlrDiContainer.new()
+	container.add_provider_factory(&"slow", GdlrDiContainer.ProviderFactory.new(provider, {}, container))
+	var first := container.resolve(&"slow")
+	var second := container.resolve(&"slow")
+	assert_eq(await second.await_resolved(), "value", "Concurrent resolutions share the value.")
+	assert_true(first.is_resolved and state.calls == 1, "An in-flight provider is not run again.")
+
+	GdlrTestEvents.reset()
+	var graph := GdlrModuleGraph.new(DiamondRoot)
+	await graph.compile().await_settled()
+	var start := graph.start()
+	await start.await_settled()
+	assert_true(start.is_resolved, "A diamond graph with an asynchronous provider starts.")
+	assert_eq(GdlrTestEvents.register_order.count("SlowProvider"), 1, "The shared asynchronous provider runs once.")
+	assert_eq(GdlrTestEvents.register_order.count("SlowModule"), 1, "The shared module registers once.")

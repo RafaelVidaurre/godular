@@ -47,7 +47,7 @@ func has_job(key: StringName) -> bool:
 	return _jobs.has(key)
 
 
-## Ensures a job completes, starting `WHEN_REQUIRED` jobs when first requested.
+## Ensures a job completes. Starts WHEN_REQUIRED jobs on the first request.
 func ensure_job(key: StringName) -> GdPromise:
 	var job_spec: CapGdlrJobs.JobSpec = _job_registry.get_job(key)
 	var job: CapGdlrJobs.Job = _jobs.get(key)

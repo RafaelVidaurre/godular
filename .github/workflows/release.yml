@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publish GitHub release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install development tools
+        run: python -m pip install --requirement requirements-dev.txt
+
+      - name: Check that the tag matches the released version
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+          cz version --project | grep -x "$version"
+          grep -x "version=\"$version\"" addons/godular/plugin.cfg
+
+      - name: Write the release notes
+        run: cz changelog "$VERSION" --dry-run > release-notes.md
+
+      - name: Build the addon archive
+        run: |
+          git archive --format=zip \
+            --prefix="godular-$GITHUB_REF_NAME/" \
+            --output="godular-$GITHUB_REF_NAME.zip" \
+            "$GITHUB_REF_NAME"
+          unzip -l "godular-$GITHUB_REF_NAME.zip"
+
+      - name: Create the GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          name: ${{ github.ref_name }}
+          body_path: release-notes.md
+          files: godular-${{ github.ref_name }}.zip
+          fail_on_unmatched_files: true
