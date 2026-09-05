@@ -14,7 +14,7 @@ cd "$repository_root"
 
 xml_root=$(mktemp -d)
 trap 'rm -rf "$xml_root"' EXIT
-mkdir -p "$xml_root/engine" "$xml_root/godular" "$xml_root/gd_promise"
+mkdir -p "$xml_root/engine" "$xml_root/godular" "$xml_root/gdb_promise"
 
 # Import the project once so script classes resolve.
 ug exec -- --headless --editor --path . --quit
@@ -22,7 +22,7 @@ ug exec -- --headless --editor --path . --quit
 # The engine reference lets make_rst.py resolve links to engine classes.
 ug exec -- --headless --doctool "$xml_root/engine" --quit
 ug exec -- --headless --path . --doctool "$xml_root/godular" --gdscript-docs res://addons/godular --quit
-ug exec -- --headless --path . --doctool "$xml_root/gd_promise" --gdscript-docs res://addons/gd_promise --quit
+ug exec -- --headless --path . --doctool "$xml_root/gdb_promise" --gdscript-docs res://addons/gdb_promise --quit
 
 python3 tools/render_api_reference.py "$xml_root" docs/api/classes
 

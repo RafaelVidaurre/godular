@@ -8,13 +8,12 @@ Each module declares what it needs, what it provides, and what it shares. Godula
 - Middleware that runs before, after, or around a callable.
 - A command bus for local handlers and transports you provide.
 - Jobs with dependencies, manual start options, and resets.
-- The bundled GdPromise library for asynchronous work.
 
 ## Install
 
 Godular needs Godot 4.5 or later.
 
-1. Install the `addons` folder. Keep both `addons/godular` and `addons/gd_promise`.
+1. Install the complete `addons` folder from your download. Keep both bundled add-on folders.
 2. Enable **Godular** under **Project Settings**, then **Plugins**.
 3. Follow the [getting started guide](https://rafaelvidaurre.github.io/godular/guide/getting-started.html) to create your first module.
 

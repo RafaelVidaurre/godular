@@ -57,19 +57,19 @@ enum JobRunPolicy {
 ## Starts a [constant MANUAL] job and returns a promise of its
 ## output. The promise rejects when the job is not manual. A job that
 ## already ran returns its existing promise.
-@abstract func run_job(key: StringName, args := {}) -> GdPromise
+@abstract func run_job(key: StringName, args := {}) -> GdbPromise
 ## Returns a promise of the output of the job with [param key]. Creates the
 ## job on the first call. A [constant WHEN_REQUIRED] job starts
 ## immediately. A [constant MANUAL] job starts on
 ## [method run_job].
-@abstract func ensure_job(key: StringName) -> GdPromise
+@abstract func ensure_job(key: StringName) -> GdbPromise
 ## Clears the job with [param key] so that it can run again. A job that
 ## waits for its start, completed, or failed is cleared at once. For a job
 ## that waits for requirements or runs, the method fails unless
 ## [param abort_started] is true. Then it calls
 ## [method CapGdlrJobs.JobSpec.abort_current_run], marks the job as failed,
 ## and clears it.
-@abstract func reset_job(key: StringName, abort_started := false) -> GdPromise
+@abstract func reset_job(key: StringName, abort_started := false) -> GdbPromise
 ## Returns the output of the completed job with [param key]. Fails when no
 ## job with that key ran.
 @abstract func get_job_output(key: StringName) -> Variant
@@ -90,11 +90,11 @@ enum JobRunPolicy {
 ##
 ## const KEY := &"save/load"
 ##
-## func _ensure_requirements() -> GdPromise:
+## func _ensure_requirements() -> GdbPromise:
 ##     return ensure_job(MountStorageJob.KEY)
 ##
-## func _run(args := {}) -> GdPromise:
-##     return GdPromise.new_resolved(load_save())
+## func _run(args := {}) -> GdbPromise:
+##     return GdbPromise.new_resolved(load_save())
 ## [/codeblock]
 ## Register the specification with [method CapGdlrJobsRegistry.register_job].
 class JobSpec:
@@ -117,12 +117,12 @@ class JobSpec:
 
 	## Returns a promise that resolves when the requirements are met. See
 	## [method _ensure_requirements].
-	func ensure_requirements() -> GdPromise:
+	func ensure_requirements() -> GdbPromise:
 		return _ensure_requirements()
 
 
 	## Runs the job. See [method _run].
-	func run(args := {}) -> GdPromise:
+	func run(args := {}) -> GdbPromise:
 		return _run(args)
 
 
@@ -146,7 +146,7 @@ class JobSpec:
 
 	## Returns a promise of the output of another job. See
 	## [method CapGdlrJobs.ensure_job]. Use it in [method _ensure_requirements].
-	func ensure_job(key: StringName) -> GdPromise:
+	func ensure_job(key: StringName) -> GdbPromise:
 		return _svc_jobs.ensure_job(key)
 
 
@@ -157,15 +157,15 @@ class JobSpec:
 
 	## Override it to do the work. Return a promise of the job output. Reject
 	## the promise to fail the job.
-	func _run(args := {}) -> GdPromise:
+	func _run(args := {}) -> GdbPromise:
 		assert(false, "Subclass must implement _run")
 		return null
 
 
 	## Override it to wait for other jobs or resources before [method _run].
 	## The default resolves at once.
-	func _ensure_requirements() -> GdPromise:
-		return GdPromise.new_resolved()
+	func _ensure_requirements() -> GdbPromise:
+		return GdbPromise.new_resolved()
 
 
 	## Override it to change when the job starts. The default is
@@ -196,7 +196,7 @@ class Job:
 	var aborted := false
 	## Resolves with [member output] when the job completes. Rejects with
 	## [member error] when the job fails.
-	var promise := GdPromise.new(func(resolve, reject):
+	var promise := GdbPromise.new(func(resolve, reject):
 		while true:
 			var status: JobStatus = await status_changed
 			if status == JobStatus.COMPLETED:
@@ -217,7 +217,7 @@ class Job:
 	## Sets the status to [constant CapGdlrJobs.WAITING_FOR_REQUIREMENTS] and
 	## waits for the requirements of the specification. A rejection fails
 	## the job.
-	func ensure_requirements() -> GdPromise:
+	func ensure_requirements() -> GdbPromise:
 		var ensuring_requirements_promise := spec.ensure_requirements()
 		status = JobStatus.WAITING_FOR_REQUIREMENTS
 		ensuring_requirements_promise.catch(func(error_: Variant):
@@ -230,7 +230,7 @@ class Job:
 
 	## Sets the status to [constant CapGdlrJobs.RUNNING], runs the
 	## specification, and returns [member promise].
-	func run(args := {}) -> GdPromise:
+	func run(args := {}) -> GdbPromise:
 		var running_job_promise := spec.run(args)
 		status = JobStatus.RUNNING
 

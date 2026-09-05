@@ -13,9 +13,9 @@ static var INJECT = [{"token": &"slow", "property": "slow"}]
 var slow: String
 
 
-static func create_slow() -> GdPromise:
+static func create_slow() -> GdbPromise:
 	GdlrTestEvents.register_order.append("SlowProvider")
-	return GdPromise.new(func(resolve: Callable, _reject: Callable) -> void:
+	return GdbPromise.new(func(resolve: Callable, _reject: Callable) -> void:
 		await (Engine.get_main_loop() as SceneTree).process_frame
 		resolve.call("slow")
 	)

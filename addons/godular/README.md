@@ -11,7 +11,7 @@ Godular supplies those dependencies and starts modules in dependency order, wait
 
 Godular needs Godot 4.5 or later.
 
-1. Keep both `addons/godular` and the bundled `addons/gd_promise` folder in your project.
+1. Keep both `addons/godular` and the bundled `addons/gdb_promise` folder in your project.
 2. Enable "Godular" under Project Settings, then Plugins.
 3. Follow the [getting started guide](https://rafaelvidaurre.github.io/godular/guide/getting-started.html) to create and start your first module.
 

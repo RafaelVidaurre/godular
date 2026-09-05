@@ -8,7 +8,7 @@ extends RefCounted
 ## @tutorial(Dependency injection): https://rafaelvidaurre.github.io/godular/guide/dependency-injection.html
 
 var _instances_cache: Dictionary[Variant, Variant] = {}
-var _pending_resolutions: Dictionary[Variant, GdPromise] = {}
+var _pending_resolutions: Dictionary[Variant, GdbPromise] = {}
 var _provider_factories: Dictionary[Variant, ProviderFactory] = {}
 
 
@@ -21,19 +21,19 @@ func add_provider_factory(token: Variant, provider: ProviderFactory) -> void:
 ## cached value. Calls made while the first resolution is in flight share
 ## its promise, so the provider runs once. Failed resolutions are not cached;
 ## a later call retries the provider.
-func resolve(token: Variant) -> GdPromise:
+func resolve(token: Variant) -> GdbPromise:
 	var token_name = _get_token_name(token)
 
 	if _instances_cache.has(token):
 		var cached_value = _instances_cache[token]
-		return GdPromise.new_resolved(cached_value)
+		return GdbPromise.new_resolved(cached_value)
 
 	if _pending_resolutions.has(token):
 		return _pending_resolutions[token]
 
 	if not _provider_factories.has(token):
 		assert(false, "No provider found for token: %s (token value: %s)" % [token_name, token])
-		return GdPromise.new_rejected("No provider found for token: %s" % token_name)
+		return GdbPromise.new_rejected("No provider found for token: %s" % token_name)
 
 	var resolution := _provider_factories[token].resolve().then(func(value: Variant):
 		_instances_cache[token] = value
@@ -41,7 +41,7 @@ func resolve(token: Variant) -> GdPromise:
 		return value
 	).catch(func(reason: Variant):
 		_pending_resolutions.erase(token)
-		return GdPromise.new_rejected(reason)
+		return GdbPromise.new_rejected(reason)
 	)
 	if not resolution.is_settled:
 		_pending_resolutions[token] = resolution
@@ -84,8 +84,8 @@ class ProviderFactory extends RefCounted:
 
 	## Resolves the dependencies through their own containers, then creates
 	## the provider value.
-	func resolve() -> GdPromise:
-		var dependency_promises: Array[GdPromise] = []
+	func resolve() -> GdbPromise:
+		var dependency_promises: Array[GdbPromise] = []
 		for required_token in _provider_definition.requires:
 			var dep_factory: ProviderFactory = _dependency_providers[required_token]
 			if dep_factory._owner_container:
@@ -93,7 +93,7 @@ class ProviderFactory extends RefCounted:
 			else:
 				dependency_promises.append(dep_factory.resolve())
 
-		return GdPromise.all(dependency_promises).then(func(dependencies: Array[Variant]):
+		return GdbPromise.all(dependency_promises).then(func(dependencies: Array[Variant]):
 			return _provider_definition.resolve(dependencies)
 		)
 

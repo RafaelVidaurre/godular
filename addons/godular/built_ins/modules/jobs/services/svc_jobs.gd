@@ -9,12 +9,12 @@ func _init(job_registry: CapGdlrJobsRegistry) -> void:
 
 
 ## Runs a manual job once and resolves with its output.
-func run_job(key: StringName, args := {}) -> GdPromise:
+func run_job(key: StringName, args := {}) -> GdbPromise:
 	var job_spec: CapGdlrJobs.JobSpec = _job_registry.get_job(key)
 	assert(job_spec != null, "Job spec not found in jobs registry: %s" % key)
 
 	if job_spec.get_run_policy() != JobRunPolicy.MANUAL:
-		return GdPromise.new_rejected("Job %s is not runnable on demand" % key)
+		return GdbPromise.new_rejected("Job %s is not runnable on demand" % key)
 
 	_create_job(job_spec)
 
@@ -48,7 +48,7 @@ func has_job(key: StringName) -> bool:
 
 
 ## Ensures a job completes. Starts WHEN_REQUIRED jobs on the first request.
-func ensure_job(key: StringName) -> GdPromise:
+func ensure_job(key: StringName) -> GdbPromise:
 	var job_spec: CapGdlrJobs.JobSpec = _job_registry.get_job(key)
 	var job: CapGdlrJobs.Job = _jobs.get(key)
 
@@ -65,13 +65,13 @@ func ensure_job(key: StringName) -> GdPromise:
 	return job.promise
 
 ## Clears a job so it can run again.
-func reset_job(key: StringName, abort_started := false) -> GdPromise:
+func reset_job(key: StringName, abort_started := false) -> GdbPromise:
 	var job: CapGdlrJobs.Job = _jobs.get(key)
 	if not job:
 		var msg := "No job with key %s has been run yet" % key
 		assert(false, msg)
 		push_error(msg)
-		return GdPromise.new_rejected(msg)
+		return GdbPromise.new_rejected(msg)
 
 	var status := job.status
 	if not [CapGdlrJobs.JobStatus.WAITING_FOR_START, CapGdlrJobs.JobStatus.COMPLETED, CapGdlrJobs.JobStatus.FAILED].has(status):
@@ -81,16 +81,16 @@ func reset_job(key: StringName, abort_started := false) -> GdPromise:
 			job.error = "Job %s aborted for reset while status was %s" % [key, status]
 			job.status = CapGdlrJobs.JobStatus.FAILED
 			_jobs.erase(key)
-			return GdPromise.new_resolved()
+			return GdbPromise.new_resolved()
 
 		var msg := "Cannot reset job %s. Its status is %s" % [key, job.status]
 		assert(false, msg)
 		push_error(msg)
-		return GdPromise.new_rejected(msg)
+		return GdbPromise.new_rejected(msg)
 
 	_jobs.erase(key)
 
-	return GdPromise.new_resolved()
+	return GdbPromise.new_resolved()
 
 
 func _create_job(job_spec: CapGdlrJobs.JobSpec) -> CapGdlrJobs.Job:
@@ -104,8 +104,8 @@ func _create_job(job_spec: CapGdlrJobs.JobSpec) -> CapGdlrJobs.Job:
 	return job
 
 
-func _get_job_started_promise(key: StringName) -> GdPromise:
-	return GdPromise.new(func(resolve, reject):
+func _get_job_started_promise(key: StringName) -> GdbPromise:
+	return GdbPromise.new(func(resolve, reject):
 		var job: CapGdlrJobs.Job = _jobs.get(key)
 
 		if job == null:
@@ -132,7 +132,7 @@ func _get_job_started_promise(key: StringName) -> GdPromise:
 	)
 
 
-func _start_job(job_spec: JobSpec, args := {}) -> GdPromise:
+func _start_job(job_spec: JobSpec, args := {}) -> GdbPromise:
 	var key := job_spec.get_key()
 	var job: CapGdlrJobs.Job = _jobs.get(key)
 
@@ -140,7 +140,7 @@ func _start_job(job_spec: JobSpec, args := {}) -> GdPromise:
 		var msg := "FATAL: Job not found for key: %s, but the job was ready to start. This should never happen" % key
 		assert(false, msg)
 		push_error(msg)
-		return GdPromise.new_rejected(msg)
+		return GdbPromise.new_rejected(msg)
 
 	if job.status != CapGdlrJobs.JobStatus.WAITING_FOR_START:
 		return job.promise
@@ -148,7 +148,7 @@ func _start_job(job_spec: JobSpec, args := {}) -> GdPromise:
 	job_spec.initialize(self)
 	job.ensure_requirements().then(func(_res):
 		if job.aborted or _jobs.get(key) != job:
-			return GdPromise.new_rejected("Job %s was aborted before requirements completed" % key)
+			return GdbPromise.new_rejected("Job %s was aborted before requirements completed" % key)
 		return job.run(args)
 	)
 

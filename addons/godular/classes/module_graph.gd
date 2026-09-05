@@ -24,7 +24,7 @@ const DEFAULT_MODULE_ENABLE_TIMEOUT_S := 90.0
 var _root_module: GdlrModuleDefinition
 var _modules_definitions: Dictionary[GDScript, GdlrModuleDefinition] = {}
 var _module_instances: Dictionary[GDScript, GdlrModule] = {}
-var _pending_mounts: Dictionary[GDScript, GdPromise] = {}
+var _pending_mounts: Dictionary[GDScript, GdbPromise] = {}
 var _unprocessed_root_module: Variant
 var _module_containers: Dictionary[GDScript, GdlrDiContainer] = {}
 var _tree_exports_providers: Dictionary[Variant, Dictionary] = {}
@@ -40,7 +40,7 @@ func _init(root_module: Variant) -> void:
 ## Resolves every module definition from the root module, checks the tree
 ## exports, and builds one dependency container per module. Call it before
 ## [method start].
-func compile() -> GdPromise:
+func compile() -> GdbPromise:
 	return _resolve_module_graph() \
 		.then(func(_res):
 		var root_module_key: GDScript
@@ -66,7 +66,7 @@ func compile() -> GdPromise:
 ## [method GdlrModule.register], resolves every tree export, and then calls
 ## [method GdlrModule.enable] in dependency order. The promise resolves after
 ## the last [method GdlrModule.enable] call returns.
-func start() -> GdPromise:
+func start() -> GdbPromise:
 	return _mount_all_modules().then(func(_res):
 		return _resolve_tree_exports()
 	).then(func(_res):
@@ -170,9 +170,9 @@ func _is_script_subclass_of(script: Script, base_script: Script) -> bool:
 	return false
 
 
-func _resolve_module_graph(module: Variant = _unprocessed_root_module) -> GdPromise:
-	return GdPromise.new(func(resolve, reject):
-		var normalize_module_definition_promise: GdPromise = _normalize_module_definition(module)
+func _resolve_module_graph(module: Variant = _unprocessed_root_module) -> GdbPromise:
+	return GdbPromise.new(func(resolve, reject):
+		var normalize_module_definition_promise: GdbPromise = _normalize_module_definition(module)
 		await normalize_module_definition_promise.await_settled()
 
 		if normalize_module_definition_promise.is_rejected:
@@ -182,18 +182,18 @@ func _resolve_module_graph(module: Variant = _unprocessed_root_module) -> GdProm
 		var definition: GdlrModuleDefinition = normalize_module_definition_promise.result
 		_store_module_definition(definition)
 
-		var process_imports_promise: GdPromise = _process_module_imports(definition)
+		var process_imports_promise: GdbPromise = _process_module_imports(definition)
 		await process_imports_promise.await_settled()
 
 		if process_imports_promise.is_rejected:
 			reject.call(process_imports_promise.value)
 			return
 
-		var import_promises: Array[GdPromise] = []
+		var import_promises: Array[GdbPromise] = []
 		for imported_module in definition.get_imports().values():
 			import_promises.append(_resolve_module_graph(imported_module))
 
-		var all_import_promises = GdPromise.all(import_promises)
+		var all_import_promises = GdbPromise.all(import_promises)
 		await all_import_promises.await_settled()
 
 		if all_import_promises.is_rejected:
@@ -218,17 +218,17 @@ func _store_module_definition(definition: GdlrModuleDefinition) -> void:
 			definition._tree_exports[tree_export_key] = definition._tree_exports[tree_export_key] or core_definition._tree_exports[tree_export_key]
 
 
-func _process_module_imports(definition: GdlrModuleDefinition) -> GdPromise:
+func _process_module_imports(definition: GdlrModuleDefinition) -> GdbPromise:
 	if definition._unprocessed_imports.is_empty():
-		return GdPromise.new_resolved()
+		return GdbPromise.new_resolved()
 
-	return GdPromise.new(func(resolve, reject):
-		var import_promises: Array[GdPromise] = []
+	return GdbPromise.new(func(resolve, reject):
+		var import_promises: Array[GdbPromise] = []
 
 		for imported_module in definition._unprocessed_imports:
 			import_promises.append(_normalize_module_definition(imported_module))
 
-		var all_imports = GdPromise.all(import_promises)
+		var all_imports = GdbPromise.all(import_promises)
 		await all_imports.await_settled()
 
 		var normalized_imports: Array = all_imports.result
@@ -290,9 +290,9 @@ func _build_containers() -> void:
 			container.add_provider_factory(token, provider_factory)
 
 
-func _resolve_tree_exports() -> GdPromise:
-	return GdPromise.new(func(resolve, reject):
-		var resolution_promises: Array[GdPromise] = []
+func _resolve_tree_exports() -> GdbPromise:
+	return GdbPromise.new(func(resolve, reject):
+		var resolution_promises: Array[GdbPromise] = []
 		var tokens_being_resolved: Array = []
 
 		for token in _tree_exports_providers.keys():
@@ -300,16 +300,16 @@ func _resolve_tree_exports() -> GdPromise:
 			var provider_module_script: GDScript = provider_info["module_script"]
 			var container: GdlrDiContainer = _module_containers[provider_module_script]
 
-			var promise: GdPromise = container.resolve(token)
+			var promise: GdbPromise = container.resolve(token)
 			resolution_promises.append(promise)
 			tokens_being_resolved.append(token)
 
-		var all_resolved = GdPromise.all(resolution_promises)
+		var all_resolved = GdbPromise.all(resolution_promises)
 		await all_resolved.await_settled()
 
 		if all_resolved.is_rejected:
 			for i in range(resolution_promises.size()):
-				var promise: GdPromise = resolution_promises[i]
+				var promise: GdbPromise = resolution_promises[i]
 				var token: Variant = tokens_being_resolved[i]
 				if promise.is_rejected:
 					var provider_info: Dictionary = _tree_exports_providers[token]
@@ -387,15 +387,15 @@ func _find_provider_for_token(module_script: GDScript, token: Variant) -> Dictio
 	return {}
 
 
-func _mount_all_modules() -> GdPromise:
-	return GdPromise.new(func(resolve, reject):
+func _mount_all_modules() -> GdbPromise:
+	return GdbPromise.new(func(resolve, reject):
 		var modules_in_order: Array[GDScript] = _get_modules_in_dependency_order()
-		var mount_promises: Array[GdPromise] = []
+		var mount_promises: Array[GdbPromise] = []
 
 		for module_script in modules_in_order:
 			mount_promises.append(_mount_module(module_script))
 
-		var all_mounted = GdPromise.all(mount_promises)
+		var all_mounted = GdbPromise.all(mount_promises)
 		await all_mounted.await_settled()
 
 		if all_mounted.is_rejected:
@@ -405,22 +405,22 @@ func _mount_all_modules() -> GdPromise:
 	)
 
 
-func _mount_module(ModuleScript: GDScript) -> GdPromise:
+func _mount_module(ModuleScript: GDScript) -> GdbPromise:
 	if ModuleScript in _module_instances:
-		return GdPromise.new_resolved(_module_instances[ModuleScript])
+		return GdbPromise.new_resolved(_module_instances[ModuleScript])
 	if ModuleScript in _pending_mounts:
 		return _pending_mounts[ModuleScript]
 
-	var mount := GdPromise.new(func(resolve, reject):
+	var mount := GdbPromise.new(func(resolve, reject):
 		var module_definition := _modules_definitions[ModuleScript]
 		var imports: Dictionary[GDScript, GdlrModuleDefinition] = module_definition.get_imports()
 
-		var import_promises: Array[GdPromise] = []
+		var import_promises: Array[GdbPromise] = []
 		for imported_module_script in imports.keys():
 			import_promises.append(_mount_module(imported_module_script))
 
 		if not import_promises.is_empty():
-			var all_imports = GdPromise.all(import_promises)
+			var all_imports = GdbPromise.all(import_promises)
 			await all_imports.await_settled()
 
 			if all_imports.is_rejected:
@@ -434,13 +434,13 @@ func _mount_module(ModuleScript: GDScript) -> GdPromise:
 		var init_dependencies := get_init_dependencies(ModuleClass)
 		var container := _module_containers[ModuleScript]
 
-		var dependency_promises: Array[GdPromise] = []
+		var dependency_promises: Array[GdbPromise] = []
 		var property_names: Array[String] = []
 
 		for property_name in init_dependencies.keys():
 			var token: Variant = init_dependencies[property_name]
 			property_names.append(property_name)
-			var resolution_promise: GdPromise
+			var resolution_promise: GdbPromise
 
 			if container._provider_factories.has(token):
 				resolution_promise = container.resolve(token)
@@ -460,7 +460,7 @@ func _mount_module(ModuleScript: GDScript) -> GdPromise:
 			dependency_promises.append(resolution_promise)
 
 		if not dependency_promises.is_empty():
-			var all_dependencies = GdPromise.all(dependency_promises)
+			var all_dependencies = GdbPromise.all(dependency_promises)
 			await all_dependencies.await_settled()
 
 			if all_dependencies.is_rejected:
@@ -482,7 +482,7 @@ func _mount_module(ModuleScript: GDScript) -> GdPromise:
 		resolve.call(module)
 	).catch(func(reason: Variant):
 		_pending_mounts.erase(ModuleScript)
-		return GdPromise.new_rejected(reason)
+		return GdbPromise.new_rejected(reason)
 	)
 	if not mount.is_settled:
 		_pending_mounts[ModuleScript] = mount
@@ -524,9 +524,9 @@ func _enable_all_modules() -> void:
 
 	for module_script in modules_in_order:
 		var module: GdlrModule = _module_instances[module_script]
-		var promise := GdPromise.race([
-			GdPromise.to_promise(module.enable),
-			GdPromise.timeout(DEFAULT_MODULE_ENABLE_TIMEOUT_S, "Module enable timeout"),
+		var promise := GdbPromise.race([
+			GdbPromise.to_promise(module.enable),
+			GdbPromise.timeout(DEFAULT_MODULE_ENABLE_TIMEOUT_S, "Module enable timeout"),
 		])
 		await promise.await_settled()
 		if promise.is_rejected:
@@ -534,8 +534,8 @@ func _enable_all_modules() -> void:
 			assert(false, "Module %s 'enable' timed out" % _ModuleHelpers.get_module_name(module_script))
 
 
-func _normalize_module_definition(module: Variant) -> GdPromise:
-	if module is GdPromise:
+func _normalize_module_definition(module: Variant) -> GdbPromise:
+	if module is GdbPromise:
 		return module.then(func(resolved_module: Variant):
 			return _normalize_module_definition(resolved_module)
 		)
@@ -554,14 +554,14 @@ func _normalize_module_definition(module: Variant) -> GdPromise:
 		for index in range(imports.size()):
 			var import_token = imports[index]
 			if import_token == null:
-				return GdPromise.new_rejected("Import is null for module %s at index %d. This might be caused by an error in a for_root() call" % [_ModuleHelpers.get_module_name(module.ModuleScript), index])
+				return GdbPromise.new_rejected("Import is null for module %s at index %d. This might be caused by an error in a for_root() call" % [_ModuleHelpers.get_module_name(module.ModuleScript), index])
 
 		module.imports(imports)
 		module.exports(exports)
 		module.providers(merged_providers)
 		module.tree_exports(tree_exports)
 
-		return GdPromise.new_resolved(module)
+		return GdbPromise.new_resolved(module)
 
 	assert(module is GDScript, "Module must be a GDScript or a GdlrModuleDefinition")
 

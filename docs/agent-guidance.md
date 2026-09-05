@@ -35,11 +35,11 @@ Engineering principles selected for this repository. Agents must follow them.
 
 ## Dependencies
 
-- Use `GdPromise` from `addons/gd_promise` for promise behavior.
+- Use `GdbPromise` from `addons/gdb_promise` for promise behavior.
 - Do not add a promise implementation inside Godular.
-- `addons/gd_promise` is vendored from its own repository. Do not edit it here.
+- `addons/gdb_promise` is vendored from its own repository. Do not edit it here.
 - Send changes to the upstream repository, tag a release, then bump the pin in
-  `tests/dependencies.lock` and run `tools/vendor_gd_promise.sh`.
+  `tests/dependencies.lock` and run `tools/vendor_gdb_promise.sh`.
 - Do not use Git submodules for add-on dependencies. Asset Store downloads are
   Git archives, and archives do not contain submodule content.
 

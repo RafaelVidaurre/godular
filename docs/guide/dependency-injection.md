@@ -22,7 +22,7 @@ When the token is a class that extends `GdlrCapability`, the provided value must
 `use` behaves by type:
 
 - Script. Godular calls `new()` with the injected values as arguments.
-- Callable. Godular calls it with the injected values as arguments. The callable can return a `GdPromise`. Godular then waits for it.
+- Callable. Godular calls it with the injected values as arguments. The callable can return a `GdbPromise`. Godular then waits for it.
 - Any other value. Godular uses the value as is.
 
 `inject` lists tokens. Godular resolves each token from the providers the module can see, then passes the values in the same order. See [Visibility](modules.md#visibility).
@@ -45,7 +45,7 @@ static var PROVIDERS = {
 	&"second": {
 		"inject": [&"first"],
 		"use": func(first: Dictionary):
-			return GdPromise.new_resolved({"first": first}),
+			return GdbPromise.new_resolved({"first": first}),
 	},
 	&"alias": {
 		"use_existing": &"second",
@@ -71,6 +71,6 @@ Concurrent requests share a pending resolution. If it fails, a later request can
 
 ## Asynchronous providers
 
-A callable provider can return a `GdPromise`. Godular resolves the promise before it uses the value. Providers that depend on the token wait as well. Use this for services that need to load data before they are ready.
+A callable provider can return a `GdbPromise`. Godular resolves the promise before it uses the value. Providers that depend on the token wait as well. Use this for services that need to load data before they are ready.
 
 `GdlrDiContainer.resolve_sync()` exists for synchronous resolution. Every provider in the dependency chain must then be synchronous.

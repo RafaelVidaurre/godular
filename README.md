@@ -26,7 +26,7 @@ From GitHub:
 2. Copy the `addons` folder into your project.
 3. Enable "Godular" under Project Settings, then Plugins.
 
-Both packages contain `addons/godular` and `addons/gd_promise`. [GdPromise](https://github.com/RafaelVidaurre/gd-better-promises) is the promise library that Godular uses. It ships with the plugin.
+Both packages contain `addons/godular` and `addons/gdb_promise`. [GdbPromise](https://github.com/RafaelVidaurre/gd-better-promises) is the promise library that Godular uses. It ships with the plugin.
 
 Enabling the plugin adds the `GdlrModuleManager` autoload, which is how you mount and start your modules.
 
@@ -93,7 +93,6 @@ Modules compose through `IMPORTS`: a module can import other modules and consume
 - Add middleware before, after, or around a callable.
 - Dispatch commands to local handlers or through a transport you provide.
 - Run jobs with dependencies, manual start options, and resets.
-- Use the bundled GdPromise library to combine and await asynchronous work.
 - Run a module graph inside the editor to support your own tools.
 
 ## Documentation

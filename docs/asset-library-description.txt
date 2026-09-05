@@ -7,11 +7,10 @@ Included:
 - Middleware that runs before, after, or around a callable.
 - A command bus for local handlers and transports you provide.
 - Jobs with dependencies, manual start options, and resets.
-- The GdPromise library for asynchronous work.
 
 Godular needs Godot 4.5 or later.
 
-Install the addons folder, keeping both addons/godular and addons/gd_promise. Enable Godular under Project Settings, then Plugins.
+Install the complete addons folder from your download. Keep both bundled add-on folders. Enable Godular under Project Settings, then Plugins.
 
 Documentation: https://rafaelvidaurre.github.io/godular/
 
