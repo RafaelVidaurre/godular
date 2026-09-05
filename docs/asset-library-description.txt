@@ -1,0 +1,18 @@
+Godular helps you organize a Godot game into modules and connect their services.
+
+Each module declares what it needs, what it provides, and what it shares. Godular supplies those dependencies and starts modules in dependency order, waiting for asynchronous work.
+
+Included:
+- Dependency injection for services and factories.
+- Middleware that runs before, after, or around a callable.
+- A command bus for local handlers and transports you provide.
+- Jobs with dependencies, manual start options, and resets.
+- The GdPromise library for asynchronous work.
+
+Godular needs Godot 4.5 or later.
+
+Install the addons folder, keeping both addons/godular and addons/gd_promise. Enable Godular under Project Settings, then Plugins.
+
+Documentation: https://rafaelvidaurre.github.io/godular/
+
+Code, documentation, and the project icon were produced with AI assistance under human review.

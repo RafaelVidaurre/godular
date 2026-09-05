@@ -55,7 +55,7 @@ class JobsModule extends GdlrModule:
 4. After every module is registered, Godular resolves every `TREE_EXPORTS` token.
 5. Godular calls `enable()` on each module in dependency order. It awaits each call. A module that imports another module runs `enable()` after that module returns from `enable()`.
 
-Each `enable()` call must return within `GdlrModuleGraph.DEFAULT_MODULE_ENABLE_TIMEOUT_S` seconds. The value is 90. After that time Godular reports an error, stops the assertion in debug builds, and continues with the next module. The slow `enable()` keeps running.
+Each `enable()` call must return within `GdlrModuleGraph.DEFAULT_MODULE_ENABLE_TIMEOUT_S` seconds. The value is 90. After that time Godular reports an error and triggers an assertion in debug builds. If execution continues, Godular moves to the next module. The slow `enable()` keeps running.
 
 ```gdscript
 func register() -> void:
@@ -126,7 +126,7 @@ The second argument is optional. Godular only uses it to name the requester in e
 
 Only one module can tree-export a token. Godular reports an error when two modules declare the same tree export. The providing module must see a provider for the token. Otherwise Godular reports an error.
 
-`request()` fails before `start()` completes. Tree exports are not resolved before that point.
+Call `request()` after awaiting `start()` in scene code. A module can also request tree exports during `enable()`, because Godular resolves them first.
 
 ## Dynamic configuration
 

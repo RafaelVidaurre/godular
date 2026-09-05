@@ -1,6 +1,8 @@
 # Command bus
 
-The command bus dispatches commands. A command is a serializable request. The bus wraps it in an envelope, runs the envelope through bus middleware, and executes it locally, remotely, or both.
+Use the command bus to send requests to local handlers or a remote service.
+Each command holds the request data. An envelope adds metadata such as an identifier and a route.
+The bus passes the envelope through middleware, then runs the command where its route specifies.
 
 Godular ships these parts:
 
@@ -14,7 +16,7 @@ Godular ships these parts:
 | {ref}`GdlrCommandMiddleware <class_GdlrCommandMiddleware>` | Base class | |
 | {ref}`GdlrCommandTransportAdapter <class_GdlrCommandTransportAdapter>` | Base class | |
 
-## Wiring
+## Connect the services
 
 Provide the handlers service, a transport of your own, and the bus:
 

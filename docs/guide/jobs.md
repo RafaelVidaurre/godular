@@ -1,10 +1,11 @@
 # Jobs
 
-A job is a unit of work that runs once. Jobs can require other jobs. Godular runs the requirements first.
+Use jobs for work that other parts of your game need to wait for, such as loading data.
+Each job runs once until you reset it. Jobs can require other jobs; Godular waits for those requirements before starting the work.
 
 ## The jobs module
 
-Godular bundles a jobs module. Import it:
+Import the bundled jobs module:
 
 ```gdscript
 const JobsModule = preload("res://addons/godular/built_ins/modules/jobs/md_jobs.gd")

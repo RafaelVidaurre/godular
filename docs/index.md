@@ -1,8 +1,13 @@
 # Godular
 
-Godular splits a Godot game into modules. Each module declares what it imports, what it provides, and what it exports. Godular compiles the modules into a graph, builds each service once, injects it where it is needed, and enables the modules in dependency order. It waits for asynchronous work along the way.
+Godular helps you organize a Godot game into modules and connect their services.
+A module declares what it needs, what it provides, and what it shares with other modules.
 
-## In four steps
+Godular supplies the dependencies and starts modules in dependency order.
+Each provider is created once in its module and shared with its consumers.
+Godular waits for factories and module startup to finish before it starts dependent work.
+
+## Start a module
 
 1. Install the addon and enable the plugin. See [Getting started](guide/getting-started.md).
 2. Declare a capability, a service, and a module.
@@ -45,6 +50,10 @@ var score: CapScore = GdlrModuleManager.request(CapScore)
 ## Reference
 
 - [API reference](api/index.md)
+
+## AI disclosure
+
+Code, documentation, and the project icon were produced with AI assistance under human review.
 
 ```{toctree}
 :hidden:
