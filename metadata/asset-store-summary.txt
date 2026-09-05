@@ -1,0 +1,1 @@
+Organize your Godot game into modules. Godular connects their services and starts them in dependency order.

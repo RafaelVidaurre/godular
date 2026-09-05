@@ -22,7 +22,16 @@ The `Docs` workflow deploys the site from `main` on every push, so the reference
 
 Release [gd-better-promises](https://github.com/RafaelVidaurre/gd-better-promises) first. Then edit `gd_promise_tag` and `gd_promise_commit` in `tests/dependencies.lock`, run `tools/vendor_gd_promise.sh`, and commit the result. CI fails when the vendored copy does not match the lock.
 
-## Update the Asset Library
+## Update the Asset Store
+
+Open the [Godular management dashboard](https://store.godotengine.org/asset/rafael-vidaurre/godular/manage/#settings) while signed in as its publisher.
+Use [the summary](metadata/asset-store-summary.txt) for Asset Summary and [the description](metadata/asset-store-description.md) for Detailed Description.
+The description field supports Markdown. Check its Preview tab, keep the AI disclosure enabled, and save.
+
+Check the [listing](https://store.godotengine.org/asset/rafael-vidaurre/godular/) after saving.
+An asset under review remains pending until moderators publish it.
+
+## Update the legacy Asset Library
 
 Sign in as the owner of the [Godot Asset Library](https://godotengine.org/asset-library/asset/5442) entry.
 Open [Edit](https://godotengine.org/asset-library/asset/5442/edit) and paste [the canonical description](docs/asset-library-description.txt) into Description.
