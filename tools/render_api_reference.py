@@ -6,7 +6,7 @@ Usage: render_api_reference.py XML_ROOT OUTPUT_DIR
 XML_ROOT must contain:
   engine/      the engine class reference (`godot --doctool engine`)
   godular/     `godot --doctool godular --gdscript-docs res://addons/godular`
-  gd_promise/  `godot --doctool gd_promise --gdscript-docs res://addons/gd_promise`
+  gdb_promise/  `godot --doctool gdb_promise --gdscript-docs res://addons/gdb_promise`
 
 The engine classes are parsed so that make_rst.py can resolve links to them.
 Only the addon classes are written to OUTPUT_DIR. Sphinx resolves the engine
@@ -24,8 +24,8 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
-ADDON_SECTIONS = ("godular", "gd_promise")
-# addons/gd_promise is vendored from its own repository. Its doc comments
+ADDON_SECTIONS = ("godular", "gdb_promise")
+# addons/gdb_promise is vendored from its own repository. Its doc comments
 # are fixed upstream, so only the Godular classes must be complete here.
 STRICT_SECTIONS = ("godular",)
 

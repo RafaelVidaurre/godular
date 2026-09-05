@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Re-vendors addons/gd_promise from the tag pinned in tests/dependencies.lock.
+# Re-vendors addons/gdb_promise from the tag pinned in tests/dependencies.lock.
 #
-# GdPromise is developed in its own repository and copied in here, because the
+# GdbPromise is developed in its own repository and copied in here, because the
 # Asset Store forbids submodules: GitHub archives, and therefore Asset Store
 # downloads, do not carry submodule content. Copying keeps every download
 # working while the lock file keeps the version explicit.
 #
-# To bump: edit gd_promise_tag and gd_promise_commit in the lock, run this,
+# To bump: edit gdb_promise_tag and gdb_promise_commit in the lock, run this,
 # then commit the result.
 set -euo pipefail
 
@@ -27,9 +27,9 @@ read_pin() {
 	printf '%s' "$value"
 }
 
-url=$(read_pin gd_promise_url)
-tag=$(read_pin gd_promise_tag)
-commit=$(read_pin gd_promise_commit)
+url=$(read_pin gdb_promise_url)
+tag=$(read_pin gdb_promise_tag)
+commit=$(read_pin gdb_promise_commit)
 
 checkout=$(mktemp -d)
 trap 'rm -rf "$checkout"' EXIT
@@ -43,18 +43,18 @@ if [[ $actual_commit != "$commit" ]]; then
 	exit 1
 fi
 
-source=$checkout/addons/gd_promise
+source=$checkout/addons/gdb_promise
 if [[ ! -d $source ]]; then
-	echo "error: $tag has no addons/gd_promise directory" >&2
+	echo "error: $tag has no addons/gdb_promise directory" >&2
 	exit 1
 fi
 
-rm -rf addons/gd_promise
-cp -R "$source" addons/gd_promise
+rm -rf addons/gdb_promise
+cp -R "$source" addons/gdb_promise
 
 # The checksum file guards the vendored copy against local edits. Test runs
 # verify it, so regenerate it here whenever the content changes.
-find addons/gd_promise -type f -print0 | sort -z | xargs -0 shasum -a 256 \
+find addons/gdb_promise -type f -print0 | sort -z | xargs -0 shasum -a 256 \
 	> tests/dependencies.sha256
 
-echo "Vendored gd_promise $tag ($commit)"
+echo "Vendored gdb_promise $tag ($commit)"

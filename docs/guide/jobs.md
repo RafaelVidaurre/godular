@@ -25,8 +25,8 @@ extends CapGdlrJobs.JobSpec
 
 const KEY := &"jobs/dependency"
 
-func _run(_args := {}) -> GdPromise:
-	return GdPromise.new_resolved("dependency-output")
+func _run(_args := {}) -> GdbPromise:
+	return GdbPromise.new_resolved("dependency-output")
 ```
 
 ```gdscript
@@ -35,11 +35,11 @@ extends CapGdlrJobs.JobSpec
 
 const KEY := &"jobs/manual"
 
-func _ensure_requirements() -> GdPromise:
+func _ensure_requirements() -> GdbPromise:
 	return ensure_job(DependencyJob.KEY)
 
-func _run(_args := {}) -> GdPromise:
-	return GdPromise.new_resolved("manual-output")
+func _run(_args := {}) -> GdbPromise:
+	return GdbPromise.new_resolved("manual-output")
 
 func _get_run_policy() -> CapGdlrJobs.JobRunPolicy:
 	return CapGdlrJobs.JobRunPolicy.MANUAL

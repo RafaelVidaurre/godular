@@ -62,7 +62,7 @@ classes/class_capgdlrjobsregistry
 ```{toctree}
 :maxdepth: 1
 
-classes/class_gdpromise
+classes/class_gdbpromise
 ```
 
 ## Internals

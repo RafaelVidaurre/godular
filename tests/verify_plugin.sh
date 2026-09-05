@@ -18,7 +18,7 @@ trap cleanup EXIT
 
 mkdir -p "$test_dir/addons"
 cp -R addons/godular "$test_dir/addons/godular"
-cp -R addons/gd_promise "$test_dir/addons/gd_promise"
+cp -R addons/gdb_promise "$test_dir/addons/gdb_promise"
 cp -R tests/plugin_enabler "$test_dir/addons/plugin_enabler"
 cp tests/plugin_project.godot "$test_dir/project.godot"
 
@@ -26,4 +26,4 @@ ug exec "${selector[@]}" -- --headless --editor --path "$test_dir"
 
 grep -Eq '^GdlrModuleManager="\*(res://addons/godular/singletons/module_manager/module_manager.gd|uid://)' "$test_dir/project.godot"
 grep -q 'res://addons/godular/plugin.cfg' "$test_dir/project.godot"
-test -f "$test_dir/addons/gd_promise/gd_promise.gd"
+test -f "$test_dir/addons/gdb_promise/gdb_promise.gd"

@@ -59,7 +59,7 @@ func get_tree_exports() -> Dictionary[Variant, bool]:
 
 
 ## Adds imported modules and returns this definition.
-## Each entry is a module script, a [GdlrModuleDefinition], or a [GdPromise]
+## Each entry is a module script, a [GdlrModuleDefinition], or a [GdbPromise]
 ## that resolves to one of them.
 func imports(imports_: Array[Variant] = []) -> GdlrModuleDefinition:
 	_unprocessed_imports.append_array(imports_)

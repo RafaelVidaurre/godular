@@ -30,7 +30,7 @@ extends RefCounted
 ## token to a dictionary with these keys:[br]
 ## - [code]use[/code]: a script, a callable, or a plain value. Godular calls
 ## [code]new()[/code] on a script and calls a callable. It uses any other value
-## as is. A callable can return a [GdPromise] for asynchronous work.[br]
+## as is. A callable can return a [GdbPromise] for asynchronous work.[br]
 ## - [code]inject[/code]: tokens passed as positional arguments, in order.
 ## Godular resolves them from this module's providers first, then from the
 ## exports of imported modules.[br]

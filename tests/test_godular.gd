@@ -65,18 +65,18 @@ class DebugPluginFake extends GdlrModuleGraph.DebugPlugin:
 class DependencyJob extends CapGdlrJobs.JobSpec:
 	const KEY := &"jobs/test/dependency"
 
-	func _run(_args := {}) -> GdPromise:
-		return GdPromise.new_resolved("dependency-output")
+	func _run(_args := {}) -> GdbPromise:
+		return GdbPromise.new_resolved("dependency-output")
 
 
 class ManualJob extends CapGdlrJobs.JobSpec:
 	const KEY := &"jobs/test/manual"
 
-	func _ensure_requirements() -> GdPromise:
+	func _ensure_requirements() -> GdbPromise:
 		return ensure_job(DependencyJob.KEY)
 
-	func _run(_args := {}) -> GdPromise:
-		return GdPromise.new_resolved("manual-output")
+	func _run(_args := {}) -> GdbPromise:
+		return GdbPromise.new_resolved("manual-output")
 
 	func _get_run_policy() -> CapGdlrJobs.JobRunPolicy:
 		return CapGdlrJobs.JobRunPolicy.MANUAL
@@ -86,9 +86,9 @@ class PendingRunJob extends CapGdlrJobs.JobSpec:
 	const KEY := &"jobs/test/pending"
 	var run_count := 0
 
-	func _run(_args := {}) -> GdPromise:
+	func _run(_args := {}) -> GdbPromise:
 		run_count += 1
-		return GdPromise.new(func(_resolve: Callable, _reject: Callable) -> void: pass)
+		return GdbPromise.new(func(_resolve: Callable, _reject: Callable) -> void: pass)
 
 
 class PendingRequirementsJob extends CapGdlrJobs.JobSpec:
@@ -96,14 +96,14 @@ class PendingRequirementsJob extends CapGdlrJobs.JobSpec:
 	var resolve_requirements := Callable()
 	var run_count := 0
 
-	func _ensure_requirements() -> GdPromise:
-		return GdPromise.new(func(resolve: Callable, _reject: Callable) -> void:
+	func _ensure_requirements() -> GdbPromise:
+		return GdbPromise.new(func(resolve: Callable, _reject: Callable) -> void:
 			resolve_requirements = resolve
 		)
 
-	func _run(_args := {}) -> GdPromise:
+	func _run(_args := {}) -> GdbPromise:
 		run_count += 1
-		return GdPromise.new_resolved()
+		return GdbPromise.new_resolved()
 
 
 func test_module_graph_registers_and_enables_dependencies_in_order() -> void:
@@ -181,24 +181,24 @@ func test_editor_start_path_emits_started_after_async_enable() -> void:
 	await get_tree().process_frame
 
 
-func test_gd_promise_dependency_resolves_rejects_combines_and_converts() -> void:
-	var pending := GdPromise.new(func(_resolve: Callable, _reject: Callable): pass)
+func test_gdb_promise_dependency_resolves_rejects_combines_and_converts() -> void:
+	var pending := GdbPromise.new(func(_resolve: Callable, _reject: Callable): pass)
 	pending.resolve("done")
 	assert_eq(await pending.await_resolved(), "done", "A pending promise resolves.")
-	var rejected := GdPromise.new(func(_resolve: Callable, _reject: Callable): pass)
+	var rejected := GdbPromise.new(func(_resolve: Callable, _reject: Callable): pass)
 	rejected.reject("failed")
 	assert_eq(await rejected.await_rejected(), "failed", "A pending promise rejects.")
-	var all_result: Array = await GdPromise.all([
-		GdPromise.new_resolved(1),
-		GdPromise.new_resolved(2),
+	var all_result: Array = await GdbPromise.all([
+		GdbPromise.new_resolved(1),
+		GdbPromise.new_resolved(2),
 	]).await_resolved()
 	assert_eq(all_result, [1, 2], "Promise.all preserves result order.")
-	var race_result: Variant = await GdPromise.race([
-		GdPromise.new_resolved("first"),
-		GdPromise.new_resolved("second"),
+	var race_result: Variant = await GdbPromise.race([
+		GdbPromise.new_resolved("first"),
+		GdbPromise.new_resolved("second"),
 	]).await_resolved()
 	assert_eq(race_result, "first", "Promise.race uses the first settled promise.")
-	assert_eq(await GdPromise.to_promise(func(): return 3).await_resolved(), 3, "to_promise awaits a callable.")
+	assert_eq(await GdbPromise.to_promise(func(): return 3).await_resolved(), 3, "to_promise awaits a callable.")
 
 
 func test_di_container_resolves_dependencies_and_caches_singletons() -> void:
@@ -208,7 +208,7 @@ func test_di_container_resolves_dependencies_and_caches_singletons() -> void:
 		return {"value": "first"}
 	)
 	var second_provider := GdlrModuleProvider.new(&"second", [&"first"], func(first):
-		return GdPromise.new_resolved({"first": first})
+		return GdbPromise.new_resolved({"first": first})
 	)
 	var alias_provider := GdlrModuleProvider.new(&"alias", [&"second"], null, &"second")
 	var container := GdlrDiContainer.new()
@@ -370,7 +370,7 @@ func test_async_provider_and_shared_module_are_built_once() -> void:
 	var state := {"calls": 0}
 	var provider := GdlrModuleProvider.new(&"slow", [], func():
 		state.calls += 1
-		return GdPromise.new(func(resolve: Callable, _reject: Callable) -> void:
+		return GdbPromise.new(func(resolve: Callable, _reject: Callable) -> void:
 			await get_tree().process_frame
 			resolve.call("value")
 		)
@@ -396,7 +396,7 @@ func test_failed_async_provider_can_be_resolved_again() -> void:
 	var state := {"calls": 0}
 	var provider := GdlrModuleProvider.new(&"retry", [], func():
 		state.calls += 1
-		return GdPromise.new(func(resolve: Callable, reject: Callable):
+		return GdbPromise.new(func(resolve: Callable, reject: Callable):
 			await get_tree().process_frame
 			if state.calls == 1:
 				reject.call("unavailable")
@@ -423,7 +423,7 @@ func test_failed_async_module_and_its_importer_can_start_again() -> void:
 	slow.ModuleScript = load("res://tests/fixtures/slow_provider_module.gd")
 	slow.providers({&"slow": {"use": func():
 		state.calls += 1
-		return GdPromise.new(func(resolve: Callable, reject: Callable):
+		return GdbPromise.new(func(resolve: Callable, reject: Callable):
 			await get_tree().process_frame
 			if state.calls == 1:
 				reject.call("unavailable")

@@ -1,27 +1,27 @@
-# GdPromise
+# GdbPromise
 
 Promises for Godot 4, in GDScript. Chain work with `then` and `catch`, or just `await` the result, and stop threading completion callbacks through half your codebase.
 
-GDScript already gives you `await`, which is fine until the thing you are waiting on can fail, or you need to wait on several things at once, or the work is started in one place and awaited in another. `GdPromise` is a single `RefCounted` script that gives you one object representing a result that has not arrived yet. You can hand it around, await it from several places, combine it with others, and it settles exactly once.
+GDScript already gives you `await`, which is fine until the thing you are waiting on can fail, or you need to wait on several things at once, or the work is started in one place and awaited in another. `GdbPromise` is a single `RefCounted` script that gives you one object representing a result that has not arrived yet. You can hand it around, await it from several places, combine it with others, and it settles exactly once.
 
 ## Getting started
 
 ### Install
 
-GdPromise needs Godot 4.5 or later. The test suite runs against 4.5, 4.6, and 4.7.
+GdbPromise needs Godot 4.5 or later. The test suite runs against 4.5, 4.6, and 4.7.
 
 1. Download this repository as a zip, or grab a release.
-2. Copy `addons/gd_promise` into your project's `addons` folder.
+2. Copy `addons/gdb_promise` into your project's `addons` folder.
 
-There is no plugin to enable. `GdPromise` is a `class_name`, so it is available everywhere as soon as Godot imports the script.
+There is no plugin to enable. `GdbPromise` is a `class_name`, so it is available everywhere as soon as Godot imports the script.
 
 ### Your first promise
 
 Create a promise, settle it later, and await it from anywhere:
 
 ```gdscript
-func load_profile() -> GdPromise:
-	var promise := GdPromise.new(func(resolve: Callable, reject: Callable) -> void:
+func load_profile() -> GdbPromise:
+	var promise := GdbPromise.new(func(resolve: Callable, reject: Callable) -> void:
 		var request := HTTPRequest.new()
 		add_child(request)
 		request.request_completed.connect(func(_result, code, _headers, body):
@@ -51,8 +51,8 @@ load_profile() \
 Combine several, and give the whole thing a deadline:
 
 ```gdscript
-var all_done := GdPromise.all([load_profile(), load_settings()])
-var result = await GdPromise.race([all_done, GdPromise.timeout(5.0)]).await_settled()
+var all_done := GdbPromise.all([load_profile(), load_settings()])
+var result = await GdbPromise.race([all_done, GdbPromise.timeout(5.0)]).await_settled()
 ```
 
 ## What's in the box
@@ -66,7 +66,7 @@ var result = await GdPromise.race([all_done, GdPromise.timeout(5.0)]).await_sett
 
 ## Documentation
 
-The API reference is generated from the doc comments in the source and lives in [docs/reference](https://github.com/RafaelVidaurre/gd-better-promises/blob/main/docs/reference/GdPromise.md). It is also in Godot's built-in help (F1), since the engine reads the same comments.
+The API reference is generated from the doc comments in the source and lives in [docs/reference](https://github.com/RafaelVidaurre/gd-better-promises/blob/main/docs/reference/GdbPromise.md). It is also in Godot's built-in help (F1), since the engine reads the same comments.
 
 ## Running the tests
 

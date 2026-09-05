@@ -149,6 +149,6 @@ static func for_root(value: String) -> GdlrModuleDefinition:
 	return definition
 ```
 
-Pass the definition to `GdlrModuleManager.mount()` or list it in the `IMPORTS` of another module. `IMPORTS` entries can also be a `GdPromise` that resolves to a module script or a definition.
+Pass the definition to `GdlrModuleManager.mount()` or list it in the `IMPORTS` of another module. `IMPORTS` entries can also be a `GdbPromise` that resolves to a module script or a definition.
 
 Godular merges the static members of the script with the definition. Providers in the definition replace static providers with the same token. In the example, `request(&"setting")` returns the value passed to `for_root()`.

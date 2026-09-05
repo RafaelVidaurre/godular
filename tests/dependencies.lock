@@ -1,11 +1,11 @@
 # Vendored dependencies. Bump a version by editing this file, then running
-# tools/vendor_gd_promise.sh (gd_promise). Content is verified against
+# tools/vendor_gdb_promise.sh (gdb_promise). Content is verified against
 # tests/dependencies.sha256 on every test run.
 
-gd_promise_url=https://github.com/RafaelVidaurre/gd-better-promises.git
-gd_promise_version=0.1.0
-gd_promise_tag=v0.1.0
-gd_promise_commit=6537d0178800a947d8fcd8bb88b5e23af0b53e57
+gdb_promise_url=https://github.com/RafaelVidaurre/gd-better-promises.git
+gdb_promise_version=0.2.0
+gdb_promise_tag=v0.2.0
+gdb_promise_commit=991100d2edbaa4df53d7bcfe2334728d65ab77ef
 
 gut_version=9.7.1
 gut_tag=v9.7.1

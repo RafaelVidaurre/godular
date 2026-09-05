@@ -15,7 +15,7 @@ Open an issue before you start on a feature or a change to the public API. This 
 
 Open the repository root in Godot to work in the editor. The project already enables the Godular and GUT plugins.
 
-`addons/gd_promise` is vendored from [gd-better-promises](https://github.com/RafaelVidaurre/gd-better-promises) at the tag pinned in `tests/dependencies.lock`. Do not edit it here. Send changes to that repository.
+`addons/gdb_promise` is vendored from [gd-better-promises](https://github.com/RafaelVidaurre/gd-better-promises) at the tag pinned in `tests/dependencies.lock`. Do not edit it here. Send changes to that repository.
 
 ## Make a change
 

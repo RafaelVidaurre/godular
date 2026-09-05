@@ -11,21 +11,21 @@ permissions:
 
 jobs:
   vendored:
-    name: Vendored gd_promise matches the lock
+    name: Vendored gdb_promise matches the lock
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
         uses: actions/checkout@v6
 
       - name: Re-vendor from the pinned tag
-        run: bash tools/vendor_gd_promise.sh
+        run: bash tools/vendor_gdb_promise.sh
 
       - name: Fail when the vendored copy has drifted
         run: |
-          git add --all addons/gd_promise tests/dependencies.sha256
-          if ! git diff --cached --quiet -- addons/gd_promise tests/dependencies.sha256; then
-            echo "addons/gd_promise does not match the tag pinned in tests/dependencies.lock."
-            echo "Edit the lock and run tools/vendor_gd_promise.sh, or revert local edits."
-            git diff --cached -- addons/gd_promise tests/dependencies.sha256
+          git add --all addons/gdb_promise tests/dependencies.sha256
+          if ! git diff --cached --quiet -- addons/gdb_promise tests/dependencies.sha256; then
+            echo "addons/gdb_promise does not match the tag pinned in tests/dependencies.lock."
+            echo "Edit the lock and run tools/vendor_gdb_promise.sh, or revert local edits."
+            git diff --cached -- addons/gdb_promise tests/dependencies.sha256
             exit 1
           fi

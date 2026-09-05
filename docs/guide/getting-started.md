@@ -16,7 +16,9 @@ From GitHub:
 2. Copy the `addons` folder into your project.
 3. Enable "Godular" under Project Settings, then Plugins.
 
-Both packages contain `addons/godular` and `addons/gd_promise`. Godular uses the {ref}`GdPromise <class_GdPromise>` library for asynchronous work. It is developed in the [gd-better-promises](https://github.com/RafaelVidaurre/gd-better-promises) repository and bundled here. Keep both folders.
+Both packages contain `addons/godular` and `addons/gdb_promise`. Godular uses the {ref}`GdbPromise <class_GdbPromise>` library for asynchronous work. It is developed in the [gd-better-promises](https://github.com/RafaelVidaurre/gd-better-promises) repository and bundled here. Keep both folders.
+
+Version 0.2.0 uses `GdbPromise` in `addons/gdb_promise`. When upgrading from 0.1.0, remove the old `addons/gd_promise` folder and replace `GdPromise` with `GdbPromise` in your scripts. The Store may still provide 0.1.0 while the new version awaits submission or review. Use the [GitHub releases](https://github.com/RafaelVidaurre/godular/releases) for version 0.2.0.
 
 When you enable the plugin, it adds the `GdlrModuleManager` autoload. This autoload mounts and starts your modules.
 
