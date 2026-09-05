@@ -24,7 +24,12 @@ Release [gd-better-promises](https://github.com/RafaelVidaurre/gd-better-promise
 
 ## Update the Asset Library
 
-The [Godot Asset Library](https://godotengine.org/asset-library/asset/5442) entry is updated by hand. Open the asset, submit an edit that points at the new tag, and wait for moderation.
+Sign in as the owner of the [Godot Asset Library](https://godotengine.org/asset-library/asset/5442) entry.
+Open [Edit](https://godotengine.org/asset-library/asset/5442/edit) and paste [the canonical description](docs/asset-library-description.txt) into Description.
+Keep its blank lines and plain-text bullets. The listing preserves line breaks but does not render Markdown or HTML.
+
+For a release update, set Download Commit/URL to the full commit hash of the release tag.
+Submit the edit and wait for moderation. Check Recent Edits for its status.
 
 ## First release
 

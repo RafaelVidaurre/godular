@@ -1,8 +1,12 @@
 # Godular
 
-Modular architecture for Godot. Godular lets you split a game into modules that declare what they provide and what they depend on, and it wires everything together for you.
+Godular helps you organize a Godot game into modules and connect their services.
+Each module declares what it needs, what it provides, and what it shares.
+Godular supplies those dependencies and starts modules in dependency order.
 
-If your project has reached the point where autoloads reach into other autoloads and nobody remembers what has to initialize first, that is the problem Godular solves. You describe each part of your game as a module with imports, providers, and exports. Godular compiles them into a graph, builds every service exactly once, injects it wherever it is needed, and enables modules in dependency order, waiting for async work along the way.
+For example, a score module can provide a service that both gameplay and the UI use.
+Godular creates that provider once in its module and shares the instance with its consumers.
+If a service needs to load data or a module needs time to start, Godular waits for it.
 
 Documentation: <https://rafaelvidaurre.github.io/godular/>
 
@@ -82,15 +86,15 @@ func _ready() -> void:
 
 Modules compose through `IMPORTS`: a module can import other modules and consume anything they export. Godular registers and enables dependencies before dependants. It enables modules one at a time, and waits for each `enable()` before it calls the next one.
 
-## What's in the box
+## Features
 
-- Module graph: declarative `IMPORTS`, `PROVIDERS`, `EXPORTS`, and `TREE_EXPORTS`, compiled and started in dependency order.
-- Dependency injection: a container that builds each provider once, resolves factory arguments, supports async factories, and injects typed properties on modules and plain objects.
-- Middleware pipelines: wrap any callable with before, after, and around callbacks, with priorities and core overrides.
-- Command bus: dispatch commands locally or through a transport you provide, with handlers, per-command and global middleware, serializable envelopes, and rate limit metadata.
-- Jobs: declare units of work with requirements, run policies, and reset semantics, driven by promises.
-- GdPromise: a small promise library for GDScript (`all`, `race`, `await_resolved`, and more), shipped as its own addon.
-- Editor support: point `godular/editor_root_module_path` at a module and Godular runs a module graph inside the editor too, for building editor tooling.
+- Declare module dependencies with `IMPORTS`, `PROVIDERS`, `EXPORTS`, and `TREE_EXPORTS`.
+- Create services with dependency injection, including factories that return promises.
+- Add middleware before, after, or around a callable.
+- Dispatch commands to local handlers or through a transport you provide.
+- Run jobs with dependencies, manual start options, and resets.
+- Use the bundled GdPromise library to combine and await asynchronous work.
+- Run a module graph inside the editor to support your own tools.
 
 ## Documentation
 
@@ -99,6 +103,10 @@ The [documentation site](https://rafaelvidaurre.github.io/godular/) has guides f
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to report bugs, set up a clone, run the tests, and open a pull request. Maintainers release the addon as described in [RELEASING.md](RELEASING.md).
+
+## AI disclosure
+
+Code, documentation, and the project icon were produced with AI assistance under human review.
 
 ## License
 

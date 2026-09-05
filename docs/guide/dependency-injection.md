@@ -62,9 +62,12 @@ static var TREE_EXPORTS = [&"alias"]
 
 ## Scope and caching
 
-Godular creates one {ref}`GdlrDiContainer <class_GdlrDiContainer>` per module. A container builds each token once and caches the value. Every module that reads the token gets the same value.
+Godular creates one {ref}`GdlrDiContainer <class_GdlrDiContainer>` per module. A container builds each provider once and caches its value. Consumers of that provider receive the same value.
+Separate modules can provide the same token with different values.
 
 Godular resolves an injected token through the container of the module that provides it. A service exported by one module and used by three others is built once.
+
+Concurrent requests share a pending resolution. If it fails, a later request can retry the provider.
 
 ## Asynchronous providers
 

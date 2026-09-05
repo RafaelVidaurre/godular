@@ -55,7 +55,9 @@ if promise.is_rejected:
 
 ## Chaining
 
-`then(on_fulfilled)` returns a new promise. When this promise resolves, the callback runs with the value and the new promise resolves with the return value of the callback. When the callback returns a promise, the new promise follows it. When this promise rejects, the callback does not run and the new promise rejects with the same reason.
+`then(on_fulfilled)` returns a new promise. When the original promise resolves, the callback receives its value. The new promise resolves with the callback result, or follows that result if it is a promise.
+
+If the original promise rejects, the callback does not run. The new promise rejects with the same reason.
 
 `catch(callback)` returns a new promise. When this promise rejects, the callback runs with the reason and the new promise rejects with the return value of the callback. When the callback returns a promise, the new promise follows that promise. When this promise resolves, the new promise resolves with the same value.
 
