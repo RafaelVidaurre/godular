@@ -2,13 +2,18 @@
 
 This page is for maintainers. Contributors do not release.
 
-Godular follows [Semantic Versioning](https://semver.org). A release is a `v*` tag on `main`. The version lives in `addons/godular/plugin.cfg` and `.cz.toml`, and commitizen keeps them in sync.
+Godular follows [Semantic Versioning](https://semver.org). A release is a `v*` tag whose tree matches the reviewed release commit on `main`. The version lives in `addons/godular/plugin.cfg` and `.cz.toml`, and commitizen keeps them in sync.
 
 ## Cut a release
 
-1. Make sure `main` is green in CI and your clone is up to date.
-2. Run `.venv/bin/cz bump --check-consistency`. Commitizen reads the commits since the last tag, picks the next version from their types, updates `addons/godular/plugin.cfg`, creates or updates `CHANGELOG.md`, commits, and tags. Run `cz bump --dry-run` first to preview the version.
-3. Run `git push --follow-tags`.
+1. Make sure `main` is green in CI and your clone is up to date. Create a release branch from `main`.
+2. Run `.venv/bin/cz bump --dry-run --check-consistency` to preview the version. Then run `.venv/bin/cz bump --check-consistency`. Commitizen updates the version and changelog, commits, and creates a local annotated tag.
+3. Push only the release branch: `git -c push.followTags=false push -u origin HEAD`. Open a release PR. Keep the generated version commit separate from other changes.
+4. Wait for the final PR-head checks, then rebase-merge the PR. The repository requires a PR and linear history; direct pushes to `main` are rejected.
+5. Fetch and sync `main`. Identify the rebased release commit. Compare its tree with the local tag: `git rev-parse <tag>^{tree} <release-commit>^{tree}` must print the same hash twice. Also run `git diff --exit-code <tag> <release-commit> -- addons` and wait for final-main CI.
+6. Push only the verified tag: `git push origin <tag>`. Keep published tags immutable. GitHub's rebase merge changes commit hashes, so the tag retains Commitizen's original commit while the release commit on `main` has the same tree.
+
+Push branches and tags separately. A combined push can publish a tag even when GitHub rejects the branch update.
 
 The `Release` workflow (`.github/workflows/release.yml`) then:
 
