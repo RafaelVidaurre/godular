@@ -165,6 +165,22 @@ func test_module_manager_mounts_starts_and_requests_exports() -> void:
 	await get_tree().process_frame
 
 
+func test_editor_start_path_emits_started_after_async_enable() -> void:
+	GdlrTestEvents.reset()
+	var manager := ModuleManager.new()
+	get_tree().root.add_child(manager)
+	var started_graphs: Array[GdlrModuleGraph] = []
+	manager.graph_started.connect(func(graph: GdlrModuleGraph): started_graphs.append(graph))
+	await manager.mount(AsyncRoot)
+	assert_true(started_graphs.is_empty(), "Mounting does not announce startup.")
+	await manager._start_editor_module_graph()
+	assert_eq(GdlrTestEvents.enable_order, ["AsyncDependency", "AsyncRoot"], "Editor startup waits for async enable.")
+	assert_eq(started_graphs.size(), 1, "The editor path announces startup once.")
+	assert_true(manager._graph_started, "Editor startup releases graph-start waiters.")
+	manager.queue_free()
+	await get_tree().process_frame
+
+
 func test_gd_promise_dependency_resolves_rejects_combines_and_converts() -> void:
 	var pending := GdPromise.new(func(_resolve: Callable, _reject: Callable): pass)
 	pending.resolve("done")
@@ -374,3 +390,58 @@ func test_async_provider_and_shared_module_are_built_once() -> void:
 	assert_true(start.is_resolved, "A diamond graph with an asynchronous provider starts.")
 	assert_eq(GdlrTestEvents.register_order.count("SlowProvider"), 1, "The shared asynchronous provider runs once.")
 	assert_eq(GdlrTestEvents.register_order.count("SlowModule"), 1, "The shared module registers once.")
+
+
+func test_failed_async_provider_can_be_resolved_again() -> void:
+	var state := {"calls": 0}
+	var provider := GdlrModuleProvider.new(&"retry", [], func():
+		state.calls += 1
+		return GdPromise.new(func(resolve: Callable, reject: Callable):
+			await get_tree().process_frame
+			if state.calls == 1:
+				reject.call("unavailable")
+			else:
+				resolve.call("ready")
+		)
+	)
+	var container := GdlrDiContainer.new()
+	container.add_provider_factory(&"retry", GdlrDiContainer.ProviderFactory.new(provider, {}, container))
+	var first := container.resolve(&"retry")
+	var shared := container.resolve(&"retry")
+	await shared.await_settled()
+	assert_true(first.is_rejected and shared.value == "unavailable", "Concurrent callers share the failure.")
+	var retry := container.resolve(&"retry")
+	await retry.await_settled()
+	assert_true(retry.is_resolved and retry.value == "ready", "A failed provider can be retried.")
+	assert_eq(state.calls, 2, "Retry calls the factory once more.")
+
+
+func test_failed_async_module_and_its_importer_can_start_again() -> void:
+	GdlrTestEvents.reset()
+	var state := {"calls": 0}
+	var slow := GdlrModuleDefinition.new()
+	slow.ModuleScript = load("res://tests/fixtures/slow_provider_module.gd")
+	slow.providers({&"slow": {"use": func():
+		state.calls += 1
+		return GdPromise.new(func(resolve: Callable, reject: Callable):
+			await get_tree().process_frame
+			if state.calls == 1:
+				reject.call("unavailable")
+			else:
+				resolve.call("ready")
+		)
+	}})
+	var root := GdlrModuleDefinition.new()
+	root.ModuleScript = GdlrModule
+	root.imports([slow])
+	var graph := GdlrModuleGraph.new(root)
+	await graph.compile().await_settled()
+	var first := graph.start()
+	await first.await_settled()
+	assert_true(first.is_rejected, "A failed imported provider rejects startup.")
+	assert_push_error_count(1, "Startup reports the failed module dependency.")
+	var retry := graph.start()
+	await retry.await_settled()
+	assert_true(retry.is_resolved, "Both the module and its importer can retry startup.")
+	assert_eq(state.calls, 2, "The provider retries once.")
+	assert_eq(GdlrTestEvents.register_order.count("SlowModule"), 1, "Only a successful mount registers the module.")

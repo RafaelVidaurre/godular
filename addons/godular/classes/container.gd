@@ -19,7 +19,8 @@ func add_provider_factory(token: Variant, provider: ProviderFactory) -> void:
 
 ## Resolves [param token] and caches the value. Later calls return the
 ## cached value. Calls made while the first resolution is in flight share
-## its promise, so the provider runs once.
+## its promise, so the provider runs once. Failed resolutions are not cached;
+## a later call retries the provider.
 func resolve(token: Variant) -> GdPromise:
 	var token_name = _get_token_name(token)
 
@@ -38,6 +39,9 @@ func resolve(token: Variant) -> GdPromise:
 		_instances_cache[token] = value
 		_pending_resolutions.erase(token)
 		return value
+	).catch(func(reason: Variant):
+		_pending_resolutions.erase(token)
+		return GdPromise.new_rejected(reason)
 	)
 	if not resolution.is_settled:
 		_pending_resolutions[token] = resolution

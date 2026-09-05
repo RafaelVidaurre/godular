@@ -17,8 +17,8 @@ extends RefCounted
 
 const _ModuleHelpers = preload("res://addons/godular/helpers.gd")
 ## Seconds that one [method GdlrModule.enable] call can take. After this
-## time [method start] reports an error, stops the assertion in debug
-## builds, and continues with the next module.
+## time [method start] reports an error and triggers an assertion in debug
+## builds. If execution continues, Godular moves to the next module.
 const DEFAULT_MODULE_ENABLE_TIMEOUT_S := 90.0
 
 var _root_module: GdlrModuleDefinition
@@ -480,6 +480,9 @@ func _mount_module(ModuleScript: GDScript) -> GdPromise:
 		module.register()
 
 		resolve.call(module)
+	).catch(func(reason: Variant):
+		_pending_mounts.erase(ModuleScript)
+		return GdPromise.new_rejected(reason)
 	)
 	if not mount.is_settled:
 		_pending_mounts[ModuleScript] = mount
