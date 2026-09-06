@@ -1,12 +1,36 @@
 # Godular
 
-Godular helps you organize a Godot game into modules and connect their services.
-Each module declares what it needs, what it provides, and what it shares.
-Godular supplies those dependencies and starts modules in dependency order.
+_Modular architecture framework for Godot. Godular allows you to split your game (or app) into modules, leveraging dependency injection (DI) to manage complex projects and their lifecycles._
 
-For example, a score module can provide a service that both gameplay and the UI use.
-Godular creates that provider once in its module and shares the instance with its consumers.
-If a service needs to load data or a module needs time to start, Godular waits for it.
+Godular establishes a way of structuring code into modules, explicitly declaring what each module provides and what it depends on.
+This has several benefits:
+1. It makes code dependencies explicit, if something's missing, the game will fail immediately, not deep within a gameplay session.
+2. It promotes decoupling, making your code easier to maintain and reuse. Your game runs on mobile and desktop? Mount a different UI module depending on the platform.
+3. Testing is easier. Dependencies expect specific contracts (Capabilities), this alongside DI makes testing much easier. You can simply mount mock modules where you need them, allowing easier to maintain test suites and less side effects obscuring your test failures.
+
+## Important
+Keep in mind that Godular is still in early development, although it has been extensively used in my company, in a very complex repository, one project is still just one project. 
+There are still some rough edges here and there, and there's definitely a lot more that can be done to make Godular even more useful.
+
+## Features
+
+- Dependency injection for services and factories.
+- Middleware that runs before, after, or around a callable.
+- A command bus for local handlers and transports you provide.
+- Jobs with dependencies, manual start options, and resets.
+
+## Install
+
+Godular needs Godot 4.5 or later.
+
+1. Install the complete `addons` folder from your download. Keep both bundled add-on folders.
+2. Enable **Godular** under **Project Settings**, then **Plugins**.
+3. Follow the [getting started guide](https://rafaelvidaurre.github.io/godular/guide/getting-started.html) to create your first module.
+
+## AI disclosure
+
+Code, documentation, and the project icon were produced with AI assistance under human review.
+
 
 Documentation: <https://rafaelvidaurre.github.io/godular/>
 
