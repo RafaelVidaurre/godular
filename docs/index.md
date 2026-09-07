@@ -51,6 +51,11 @@ var score: CapScore = GdlrModuleManager.request(CapScore)
 
 - [API reference](api/index.md)
 
+## Project
+
+- [Contributing](contributing.md)
+- [Releasing](RELEASING.md)
+
 ## AI disclosure
 
 Code, documentation, and the project icon were produced with AI assistance under human review.
@@ -69,4 +74,5 @@ guide/promises
 guide/editor
 api/index
 contributing
+RELEASING
 ```

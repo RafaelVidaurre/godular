@@ -45,6 +45,9 @@ CI runs the suite on every supported minor version, checks the commit messages, 
 
 ## Build the docs
 
+Keep reader documentation in `docs/` and agent instructions in `agent-docs/`.
+`AGENTS.md` is the agent entry point. `CLAUDE.md` links to it.
+
 ```sh
 source .venv/bin/activate
 tools/build_docs.sh

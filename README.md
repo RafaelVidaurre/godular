@@ -12,28 +12,6 @@ This has several benefits:
 Keep in mind that Godular is still in early development, although it has been extensively used in my company, in a very complex repository, one project is still just one project. 
 There are still some rough edges here and there, and there's definitely a lot more that can be done to make Godular even more useful.
 
-## Features
-
-- Dependency injection for services and factories.
-- Middleware that runs before, after, or around a callable.
-- A command bus for local handlers and transports you provide.
-- Jobs with dependencies, manual start options, and resets.
-
-## Install
-
-Godular needs Godot 4.5 or later.
-
-1. Install the complete `addons` folder from your download. Keep both bundled add-on folders.
-2. Enable **Godular** under **Project Settings**, then **Plugins**.
-3. Follow the [getting started guide](https://rafaelvidaurre.github.io/godular/guide/getting-started.html) to create your first module.
-
-## AI disclosure
-
-Code, documentation, and the project icon were produced with AI assistance under human review.
-
-
-Documentation: <https://rafaelvidaurre.github.io/godular/>
-
 ## Install
 
 Godular needs Godot 4.5 or later. CI runs the test suite on 4.5, 4.6, and 4.7.
@@ -53,6 +31,8 @@ From GitHub:
 Both packages contain `addons/godular` and `addons/gdb_promise`. [GdbPromise](https://github.com/RafaelVidaurre/gd-better-promises) is the promise library that Godular uses. It ships with the plugin.
 
 Enabling the plugin adds the `GdlrModuleManager` autoload, which is how you mount and start your modules.
+
+Follow the [getting started guide](https://rafaelvidaurre.github.io/godular/guide/getting-started.html) to create your first module.
 
 ## Your first module
 
@@ -125,7 +105,7 @@ The [documentation site](https://rafaelvidaurre.github.io/godular/) has guides f
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for how to report bugs, set up a clone, run the tests, and open a pull request. Maintainers release the addon as described in [RELEASING.md](RELEASING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to report bugs, set up a clone, run the tests, and open a pull request. Maintainers release the addon as described in [the release guide](docs/RELEASING.md).
 
 ## AI disclosure
 
