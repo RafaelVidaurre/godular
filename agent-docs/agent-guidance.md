@@ -45,6 +45,7 @@ Engineering principles selected for this repository. Agents must follow them.
 
 ## Public repository
 
+- Keep reader documentation in `docs/` and agent instructions in `agent-docs/`.
 - Keep research and temporary records under `.crew/`.
 - Do not commit `.crew/`.
 - Exclude development dependencies and tests from published add-on archives.

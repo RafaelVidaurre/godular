@@ -1,6 +1,6 @@
 # Releasing
 
-This page is for maintainers. Contributors do not release.
+This page is for maintainers.
 
 Godular follows [Semantic Versioning](https://semver.org). A release is a `v*` tag whose tree matches the reviewed release commit on `main`. The version lives in `addons/godular/plugin.cfg` and `.cz.toml`, and commitizen keeps them in sync.
 
@@ -30,7 +30,7 @@ Release [gd-better-promises](https://github.com/RafaelVidaurre/gd-better-promise
 ## Update the Asset Store
 
 Open the [Godular management dashboard](https://store.godotengine.org/asset/rafael-vidaurre/godular/manage/#settings) while signed in as its publisher.
-Use [the summary](metadata/asset-store-summary.txt) for Asset Summary and [the description](metadata/asset-store-description.md) for Detailed Description.
+Use [the summary](../metadata/asset-store-summary.txt) for Asset Summary and {download}`the description <../metadata/asset-store-description.md>` for Detailed Description.
 The description field supports Markdown. Check its Preview tab, keep the AI disclosure enabled, and save.
 
 Check the [listing](https://store.godotengine.org/asset/rafael-vidaurre/godular/) after saving.
@@ -39,7 +39,7 @@ An asset under review remains pending until moderators publish it.
 ## Update the legacy Asset Library
 
 Sign in as the owner of the [Godot Asset Library](https://godotengine.org/asset-library/asset/5442) entry.
-Open [Edit](https://godotengine.org/asset-library/asset/5442/edit) and paste [the canonical description](docs/asset-library-description.txt) into Description.
+Open [Edit](https://godotengine.org/asset-library/asset/5442/edit) and paste [the canonical description](asset-library-description.txt) into Description.
 Keep its blank lines and plain-text bullets. The listing preserves line breaks but does not render Markdown or HTML.
 
 For a release update, set Download Commit/URL to the full commit hash of the release tag.

@@ -14,6 +14,6 @@ Follow these rules for all Git operations in this repository.
 
 ## Releases
 
+- Follow [the release guide](../docs/RELEASING.md) when preparing or publishing a release.
 - Use `cz bump --check-consistency` to create releases.
 - Do not change release versions by hand.
-

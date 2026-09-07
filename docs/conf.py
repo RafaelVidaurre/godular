@@ -21,7 +21,7 @@ extensions = [
     "sphinx_copybutton",
 ]
 
-exclude_patterns = ["_build", "agent-guidance.md", "git-guidance.md"]
+exclude_patterns = ["_build"]
 source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
 
 # Godot's make_rst.py links engine classes as :ref:`Node<class_Node>`.
